@@ -4,4 +4,5 @@ matplotlib==3.8.4
 scipy==1.13.1
 scikit-learn==1.5.2
 yfinance==0.2.66
+streamlit
 

@@ -12,10 +12,19 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from notebook_runner import execute_notebook_cell
-from notebook_sources import LPPL_NOTEBOOK_SOURCE, MULTIFRACTAL_NOTEBOOK_SOURCES
+from notebook_sources import (
+    CORRELATION_NOTEBOOK_SOURCE,
+    DRAWDOWN_NOTEBOOK_SOURCE,
+    LPPL_NOTEBOOK_SOURCE,
+    MULTIFRACTAL_NOTEBOOK_SOURCES,
+)
+from runners.multifractal import generate_mf_plots, generate_mf_corr_plots
+from runners.lppl import generate as generate_lppl
+from runners.correlation import generate as generate_correlation
+from runners.drawdowns import generate as generate_drawdowns
 from plot_helpers import PROJECT_ROOT, pretty_label, relative_to_project
-from section_featured import build_featured_section
+from section_correlation import build_correlation_section
+from section_drawdowns import build_drawdown_section
 from section_lppl import build_lppl_section
 from section_multifractal import build_multifractal_section
 
@@ -68,8 +77,9 @@ class DashboardState:
         return {
             "title": "StockParticle Plot Dashboard",
             "multifractal": build_multifractal_section(self.register_asset),
-            "featured": build_featured_section(self.register_asset),
             "lppl": build_lppl_section(self.register_asset),
+            "correlation": build_correlation_section(self.register_asset),
+            "drawdowns": build_drawdown_section(self.register_asset),
         }
 
 
@@ -145,6 +155,8 @@ def html_shell() -> str:
       --blue:#4f9cf7;
       --purple:#8b5cf6;
       --teal:#2dd4bf;
+      --orange:#f59e0b;
+      --red:#ef4444;
       --pink:#ec4899;
       --green:#16a34a;
       --danger:#ef4444;
@@ -188,6 +200,8 @@ def html_shell() -> str:
     .dot-blue{background:var(--blue)}
     .dot-purple{background:var(--purple)}
     .dot-teal{background:var(--teal)}
+    .dot-orange{background:var(--orange)}
+    .dot-red{background:var(--red)}
     .main{flex:1;overflow-y:auto;background:var(--bg)}
 
     #landing{
@@ -329,8 +343,8 @@ def html_shell() -> str:
     </div>
     <h1 class="hero-title">Stock<span>Particle</span></h1>
     <p class="hero-sub">
-      Multifractal analysis, LPPL crash diagnostics, and correlation structure
-      for equities, commodities, and crypto &mdash; driven directly from Jupyter notebooks.
+      Multifractal analysis, LPPL crash diagnostics, correlation structure, and drawdown distributions
+      for equities, commodities, and crypto.
     </p>
     <div class="hero-cards" id="hero-cards"></div>
     <div class="hero-footer" id="hero-footer"></div>
@@ -381,8 +395,9 @@ def html_shell() -> str:
 
     const TABS = [
       {id:"multifractal", label:"Multifractal", dot:"dot-blue"},
-      {id:"featured", label:"Attached Plots", dot:"dot-purple"},
       {id:"lppl", label:"LPPL-MFDFA", dot:"dot-teal"},
+      {id:"correlation", label:"Correlation & Returns", dot:"dot-orange"},
+      {id:"drawdowns", label:"Drawdowns", dot:"dot-red"},
     ];
 
     const esc = (v) => String(v)
@@ -417,7 +432,7 @@ def html_shell() -> str:
 
     const empty = (msg) => `<div class="empty">${esc(msg)}</div>`;
     const grid = (images) => images.length ? `<div class="grid">${images.map(card).join("")}</div>` : empty("No plots found.");
-    const sourceInfo = (source) => source ? `<div class="subtle">Notebook source: <code>${esc(source.notebook)}</code> cell <code>${esc(source.cell_index)}</code> -> <code>${esc(source.output_dir)}</code>${source.legacy_cell_index !== undefined ? `, legacy LPPL cell <code>${esc(source.legacy_cell_index)}</code>` : ""}</div>` : "";
+    const sourceInfo = (source) => source ? `<div class="subtle">Output: <code>${esc(source.output_dir)}</code></div>` : "";
 
     function buildNav() {
       const items = TABS.map((tab) =>
@@ -471,9 +486,10 @@ def html_shell() -> str:
 
     function populateLanding() {
       const mfCount = countImages(manifest.multifractal);
-      const featCount = countImages(manifest.featured);
       const lpplCount = countImages(manifest.lppl);
-      const totalPlots = mfCount + featCount + lpplCount;
+      const corrCount = countImages(manifest.correlation);
+      const ddCount = countImages(manifest.drawdowns);
+      const totalPlots = mfCount + lpplCount + corrCount + ddCount;
       const lpplTickers = Object.keys(manifest.lppl.tickers || {}).length;
 
       heroCardsEl.innerHTML = `
@@ -489,12 +505,19 @@ def html_shell() -> str:
           <p>Log-periodic power law fits with rolling multifractal residual diagnostics and surrogate tests.</p>
           <span class="hero-card-count">${lpplTickers} tickers &middot; ${lpplCount} plots</span>
         </div>
-        <div class="hero-card" data-goto="featured">
-          <div class="hero-card-dot dot-purple"></div>
-          <h3>Featured Plots</h3>
-          <p>Standalone reference figures including drawdown distributions and pairwise correlation heatmaps.</p>
-          <span class="hero-card-count">${featCount} plots</span>
-        </div>`;
+        <div class="hero-card" data-goto="correlation">
+          <div class="hero-card-dot dot-orange"></div>
+          <h3>Correlation & Returns</h3>
+          <p>Return distributions, autocorrelation, volatility scaling, and 2008 pairwise correlation analysis.</p>
+          <span class="hero-card-count">${corrCount} plots</span>
+        </div>
+        <div class="hero-card" data-goto="drawdowns">
+          <div class="hero-card-dot dot-red"></div>
+          <h3>Drawdowns</h3>
+          <p>Drawdown distributions for major indices compared against exponential null models.</p>
+          <span class="hero-card-count">${ddCount} plots</span>
+        </div>
+`;
 
       heroFooterEl.innerHTML = `
         <div class="hero-stat">
@@ -502,8 +525,8 @@ def html_shell() -> str:
           <div class="hero-stat-label">Total Plots</div>
         </div>
         <div class="hero-stat">
-          <div class="hero-stat-value">3</div>
-          <div class="hero-stat-label">Notebook Cells</div>
+          <div class="hero-stat-value">5</div>
+          <div class="hero-stat-label">Analysis Modules</div>
         </div>
         <div class="hero-stat">
           <div class="hero-stat-value">${lpplTickers}</div>
@@ -515,11 +538,6 @@ def html_shell() -> str:
       });
     }
 
-    function renderFeatured() {
-      topbarTitle.textContent = manifest.featured.title;
-      topbarControls.innerHTML = "";
-      app.innerHTML = `<p class="section-desc">${esc(manifest.featured.description)}</p>${grid(manifest.featured.images)}`;
-    }
 
     function renderMultifractal() {
       const groups = manifest.multifractal.groups;
@@ -530,8 +548,8 @@ def html_shell() -> str:
       const group = groups[activeMfGroup];
       topbarTitle.textContent = manifest.multifractal.title;
       topbarControls.innerHTML = `<label for="mf-group-select">Source</label><select id="mf-group-select">${keys.map((key) => `<option value="${esc(key)}" ${key===activeMfGroup?"selected":""}>${esc(groups[key].title)}</option>`).join("")}</select>`;
-      const mfStatusHtml = mfStatus ? `<div class="${esc(mfStatusClass)}">${esc(mfStatus)}</div>` : `<div class="subtle">Use refresh to rerun the exact notebook cell that owns this section.</div>`;
-      app.innerHTML = `<p class="section-desc">${esc(manifest.multifractal.description)}</p><div class="toolbar-form"><div class="form-actions"><button class="button-primary" id="mf-refresh" type="button" ${mfRunning ? "disabled" : ""}>${mfRunning ? "Running..." : "Refresh From Notebook Cell"}</button>${mfStatusHtml}</div>${sourceInfo(group.source)}</div><div class="group-block"><h3>${esc(group.title)}</h3><p class="section-desc">${esc(group.description)}</p>${grid(group.images)}</div>`;
+      const mfStatusHtml = mfStatus ? `<div class="${esc(mfStatusClass)}">${esc(mfStatus)}</div>` : `<div class="subtle">Click to regenerate plots from the analysis module.</div>`;
+      app.innerHTML = `<p class="section-desc">${esc(manifest.multifractal.description)}</p><div class="toolbar-form"><div class="form-actions"><button class="button-primary" id="mf-refresh" type="button" ${mfRunning ? "disabled" : ""}>${mfRunning ? "Running..." : "Regenerate Plots"}</button>${mfStatusHtml}</div>${sourceInfo(group.source)}</div><div class="group-block"><h3>${esc(group.title)}</h3><p class="section-desc">${esc(group.description)}</p>${grid(group.images)}</div>`;
       const select = document.getElementById("mf-group-select");
       if (select) {
         select.addEventListener("change", () => {
@@ -544,7 +562,7 @@ def html_shell() -> str:
       if (refreshButton) {
         refreshButton.addEventListener("click", async () => {
           mfRunning = true;
-          mfStatus = `Running ${group.source.notebook} cell ${group.source.cell_index}...`;
+          mfStatus = "Running multifractal analysis...";
           mfStatusClass = "subtle";
           renderMultifractal();
           mountCards();
@@ -559,7 +577,7 @@ def html_shell() -> str:
               throw new Error(result.error || "Multifractal refresh failed.");
             }
             manifest = result.manifest;
-            mfStatus = `Notebook cell ran. ${result.changed_count} files changed in ${result.output_dir}.`;
+            mfStatus = `Done. ${result.changed_count} files changed in ${result.output_dir}.`;
             mfStatusClass = "status-ok";
           } catch (error) {
             mfStatus = error.message || "Multifractal refresh failed.";
@@ -672,7 +690,7 @@ def html_shell() -> str:
         const data = new FormData(form);
         const payload = Object.fromEntries(data.entries());
         lpplRunning = true;
-        lpplStatus = `Running ${manifest.lppl.source.notebook} cell ${manifest.lppl.source.cell_index}...`;
+        lpplStatus = "Running LPPL-MFDFA analysis...";
         lpplStatusClass = "subtle";
         renderLppl();
         mountCards();
@@ -692,7 +710,7 @@ def html_shell() -> str:
           if (manifest.lppl.tickers[preferredTicker]) {
             activeLpplTicker = preferredTicker;
           }
-          lpplStatus = `Notebook cell ran. ${result.changed_count} files changed in ${result.output_dir}.`;
+          lpplStatus = `Done. ${result.changed_count} files changed in ${result.output_dir}.`;
           lpplStatusClass = "status-ok";
         } catch (error) {
           lpplStatus = error.message || "LPPL generation failed.";
@@ -705,6 +723,72 @@ def html_shell() -> str:
       });
     }
 
+    let corrRunning = false;
+    let corrStatus = "";
+    let corrStatusClass = "";
+
+    function renderCorrelation() {
+      topbarTitle.textContent = manifest.correlation.title;
+      const corrStatusHtml = corrStatus ? `<div class="${esc(corrStatusClass)}">${esc(corrStatus)}</div>` : `<div class="subtle">Click to regenerate plots from the analysis module.</div>`;
+      app.innerHTML = `<p class="section-desc">${esc(manifest.correlation.description)}</p><div class="toolbar-form"><div class="form-actions"><button class="button-primary" id="corr-refresh" type="button" ${corrRunning ? "disabled" : ""}>${corrRunning ? "Running..." : "Regenerate Plots"}</button>${corrStatusHtml}</div>${sourceInfo(manifest.correlation.source)}</div>${grid(manifest.correlation.images)}`;
+      const btn = document.getElementById("corr-refresh");
+      if (btn) btn.addEventListener("click", async () => {
+        corrRunning = true;
+        corrStatus = "Running correlation & returns analysis...";
+        corrStatusClass = "subtle";
+        renderCorrelation();
+        mountCards();
+        try {
+          const response = await fetch("/api/correlation/run", {method:"POST", headers:{"Content-Type":"application/json"}, body:"{}"});
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || "Correlation generation failed.");
+          manifest = result.manifest;
+          corrStatus = `Done. ${result.changed_count} files changed in ${result.output_dir}.`;
+          corrStatusClass = "status-ok";
+        } catch (error) {
+          corrStatus = error.message || "Correlation generation failed.";
+          corrStatusClass = "status-error";
+        } finally {
+          corrRunning = false;
+          renderCorrelation();
+          mountCards();
+        }
+      });
+    }
+
+    let ddRunning = false;
+    let ddStatus = "";
+    let ddStatusClass = "";
+
+    function renderDrawdowns() {
+      topbarTitle.textContent = manifest.drawdowns.title;
+      const ddStatusHtml = ddStatus ? `<div class="${esc(ddStatusClass)}">${esc(ddStatus)}</div>` : `<div class="subtle">Click to regenerate plots from the analysis module.</div>`;
+      app.innerHTML = `<p class="section-desc">${esc(manifest.drawdowns.description)}</p><div class="toolbar-form"><div class="form-actions"><button class="button-primary" id="dd-refresh" type="button" ${ddRunning ? "disabled" : ""}>${ddRunning ? "Running..." : "Regenerate Plots"}</button>${ddStatusHtml}</div>${sourceInfo(manifest.drawdowns.source)}</div>${grid(manifest.drawdowns.images)}`;
+      const btn = document.getElementById("dd-refresh");
+      if (btn) btn.addEventListener("click", async () => {
+        ddRunning = true;
+        ddStatus = "Running drawdown analysis...";
+        ddStatusClass = "subtle";
+        renderDrawdowns();
+        mountCards();
+        try {
+          const response = await fetch("/api/drawdowns/run", {method:"POST", headers:{"Content-Type":"application/json"}, body:"{}"});
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || "Drawdown generation failed.");
+          manifest = result.manifest;
+          ddStatus = `Done. ${result.changed_count} files changed in ${result.output_dir}.`;
+          ddStatusClass = "status-ok";
+        } catch (error) {
+          ddStatus = error.message || "Drawdown generation failed.";
+          ddStatusClass = "status-error";
+        } finally {
+          ddRunning = false;
+          renderDrawdowns();
+          mountCards();
+        }
+      });
+    }
+
     function render() {
       if (!manifest) return;
       buildNav();
@@ -712,11 +796,14 @@ def html_shell() -> str:
         case "multifractal":
           renderMultifractal();
           break;
-        case "featured":
-          renderFeatured();
-          break;
         case "lppl":
           renderLppl();
+          break;
+        case "correlation":
+          renderCorrelation();
+          break;
+        case "drawdowns":
+          renderDrawdowns();
           break;
       }
       mountCards();
@@ -793,7 +880,8 @@ class DashboardHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         parsed = urlparse(self.path)
-        if parsed.path not in {"/api/lppl/run", "/api/multifractal/run"}:
+        allowed = {"/api/lppl/run", "/api/multifractal/run", "/api/correlation/run", "/api/drawdowns/run"}
+        if parsed.path not in allowed:
             self.send_error(HTTPStatus.NOT_FOUND, "Route not found")
             return
 
@@ -804,31 +892,28 @@ class DashboardHandler(BaseHTTPRequestHandler):
             if parsed.path == "/api/multifractal/run":
                 group, overrides = parse_multifractal_payload(payload)
                 source = MULTIFRACTAL_NOTEBOOK_SOURCES[group]
-                result = execute_notebook_cell(
-                    notebook_path=source["notebook"],
-                    cell_index=int(source["cell_index"]),
-                    output_dir=source["output_dir"],
-                    assignment_overrides=overrides,
-                )
+                output_dir = source["output_dir"]
+                if group == "mf_corr_plots":
+                    result = generate_mf_corr_plots(output_dir, **overrides)
+                else:
+                    result = generate_mf_plots(output_dir, **overrides)
+            elif parsed.path == "/api/correlation/run":
+                result = generate_correlation(CORRELATION_NOTEBOOK_SOURCE["output_dir"])
+            elif parsed.path == "/api/drawdowns/run":
+                result = generate_drawdowns(DRAWDOWN_NOTEBOOK_SOURCE["output_dir"])
             else:
                 config_kwargs = parse_lppl_payload(payload)
-                lppl_overrides = {
-                    "tickers": config_kwargs["tickers"],
-                    "START_DATA": config_kwargs["start_data"],
-                    "END_DATA": config_kwargs["end_data"],
-                    "TARGET_DATE": config_kwargs["target_date"],
-                    "window_start_offsets": config_kwargs["window_start_offsets"],
-                    "ROLL_DAYS": config_kwargs["roll_days"],
-                    "ROLL_STEP": config_kwargs["roll_step"],
-                    "plot_duration": config_kwargs["plot_duration"],
-                    "SURROGATE_N": config_kwargs["surrogate_n"],
-                    "OUT_DIR": LPPL_NOTEBOOK_SOURCE["output_dir"].name,
-                }
-                result = execute_notebook_cell(
-                    notebook_path=LPPL_NOTEBOOK_SOURCE["notebook"],
-                    cell_index=int(LPPL_NOTEBOOK_SOURCE["cell_index"]),
-                    output_dir=LPPL_NOTEBOOK_SOURCE["output_dir"],
-                    assignment_overrides=lppl_overrides,
+                result = generate_lppl(
+                    LPPL_NOTEBOOK_SOURCE["output_dir"],
+                    tickers=config_kwargs["tickers"],
+                    START_DATA=config_kwargs["start_data"],
+                    END_DATA=config_kwargs["end_data"],
+                    TARGET_DATE=config_kwargs["target_date"],
+                    window_start_offsets=config_kwargs["window_start_offsets"],
+                    ROLL_DAYS=config_kwargs["roll_days"],
+                    ROLL_STEP=config_kwargs["roll_step"],
+                    plot_duration=config_kwargs["plot_duration"],
+                    SURROGATE_N=config_kwargs["surrogate_n"],
                 )
 
             self.server.state.reload()
@@ -837,7 +922,6 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 "changed_count": result["changed_count"],
                 "changed_files": result["changed_files"],
                 "output_dir": result["output_dir"],
-                "cell_index": result["cell_index"],
                 "manifest": self.server.state.manifest,
             }
             body = json.dumps(response).encode("utf-8")

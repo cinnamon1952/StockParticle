@@ -26,6 +26,20 @@ LPPL_NOTEBOOK_SOURCE = {
     "legacy_cell_index": 4,
 }
 
+CORRELATION_NOTEBOOK_SOURCE = {
+    "notebook": TRIAL_DIR / "correlation_and_returns.ipynb",
+    "cell_index": 0,
+    "output_dir": TRIAL_DIR / "corr&returns_outputs",
+    "label": "Correlation & returns plots",
+}
+
+DRAWDOWN_NOTEBOOK_SOURCE = {
+    "notebook": TRIAL_DIR / "drawdowns.ipynb",
+    "cell_index": 0,
+    "output_dir": TRIAL_DIR,
+    "label": "Drawdown distribution plots",
+}
+
 
 def source_manifest_entry(source: dict[str, object]) -> dict[str, object]:
     notebook = source["notebook"]
