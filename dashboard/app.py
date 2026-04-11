@@ -3,7 +3,8 @@ from __future__ import annotations
 import argparse
 import json
 import mimetypes
-import re
+import sys
+import threading
 import webbrowser
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -11,118 +12,23 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-
-IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"}
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-TRIAL_DIR = PROJECT_ROOT / "scripts" / "trial"
-ATTACHED_IMAGE_DEFAULTS = [
-    {
-        "title": "2008 Crash Rolling Pairwise Correlation",
-        "caption": "DJIA price and pairwise-correlation view around the 2008 bubble and crash.",
-        "prefix": "fig5_bubble_correlation",
-    },
-    {
-        "title": "NASDAQ Drawdown Distribution",
-        "caption": "Drawdown distribution against the null-hypothesis line for NASDAQ (USA).",
-        "prefix": "drawdown_nasdaq_usa_",
-    },
-    {
-        "title": "DJIA Correlation Heatmaps",
-        "caption": "Component correlation heatmaps across pre-bubble, pre-crash, and crash regimes.",
-        "prefix": "fig5b_pairwise_heatmaps",
-    },
-]
+from notebook_runner import execute_notebook_cell
+from notebook_sources import LPPL_NOTEBOOK_SOURCE, MULTIFRACTAL_NOTEBOOK_SOURCES
+from plot_helpers import PROJECT_ROOT, pretty_label, relative_to_project
+from section_featured import build_featured_section
+from section_lppl import build_lppl_section
+from section_multifractal import build_multifractal_section
 
 
-def natural_sort_key(value: str) -> list[Any]:
-    return [int(chunk) if chunk.isdigit() else chunk.lower() for chunk in re.split(r"(\d+)", value)]
-
-
-def pretty_label(value: str) -> str:
-    return value.replace("_", " ").replace("-", " ").strip().title()
-
-
-def relative_to_project(path: Path) -> str:
-    try:
-        return str(path.resolve().relative_to(PROJECT_ROOT))
-    except ValueError:
-        return str(path.resolve())
-
-
-def image_files(directory: Path) -> list[Path]:
-    if not directory.exists():
-        return []
-    return sorted(
-        [path for path in directory.iterdir() if path.is_file() and path.suffix.lower() in IMAGE_SUFFIXES],
-        key=lambda path: natural_sort_key(path.name),
-    )
-
-
-def cursor_asset_dir() -> Path:
-    project_slug = str(PROJECT_ROOT.resolve()).strip("/").replace("/", "-")
-    return Path.home() / ".cursor" / "projects" / project_slug / "assets"
-
-
-def resolve_featured_image(prefix: str) -> Path | None:
-    search_dirs = [
-        PROJECT_ROOT / "dashboard" / "assets",
-        PROJECT_ROOT / "assets",
-        cursor_asset_dir(),
-    ]
-
-    for directory in search_dirs:
-        if not directory.exists():
-            continue
-        matches = sorted(
-            [path for path in directory.glob(f"{prefix}*") if path.is_file() and path.suffix.lower() in IMAGE_SUFFIXES],
-            key=lambda path: natural_sort_key(path.name),
-        )
-        if matches:
-            return matches[0]
-
-    return None
-
-
-def explain_mf_corr_plot(path: Path) -> str:
-    name = path.stem
-    if "fullrange" in name:
-        return "This is the widest sector-level view, so it helps show whether elevated co-movement is just a crisis blip or something more persistent."
-    if "sector" in name:
-        return "This compares correlation behavior across sectors. The useful thing to watch is whether normally distinct sectors begin moving more like one synchronized block."
-    if "symmetric" in name or "fq" in name:
-        return "This plot looks at how correlation behaves across q-values, which roughly means across calmer versus more extreme fluctuations."
-    return "This multifractal correlation plot highlights how strongly market components move together across scales."
-
-
-def explain_featured_plot(title: str) -> str:
-    if "2008 Crash" in title:
-        return "The story here is rising lockstep behavior before and during the crash. When correlations climb, diversification tends to get less helpful exactly when risk is highest."
-    if "Drawdown" in title:
-        return "This compares observed drawdowns with a benchmark null line. The tail deviations are the interesting part because they suggest stress that is more severe than ordinary randomness would imply."
-    if "Heatmaps" in title:
-        return "These heatmaps are a nice visual shortcut for systemic risk: darker and more uniform coloring usually means more names are moving together."
-    return "This featured chart was included as a standalone reference plot for the dashboard."
-
-
-def explain_lppl_plot(ticker: str, suffix: str) -> str:
-    if suffix == "overview":
-        return f"This is the clearest top-level summary for `{ticker}` because it puts the main LPPL-MFDFA regime story in one frame."
-    if suffix == "rolling_trajectory":
-        return f"This rolling trajectory is useful for seeing how the signal evolves through time, rather than only where it ends up."
-    if suffix.endswith("residuals_surrogate"):
-        window = suffix.split("_", 1)[0].upper()
-        return f"This `{window}` residual-surrogate plot for `{ticker}` is more of a diagnostic check than a headline plot. It helps judge whether the leftover structure after fitting still looks too organized."
-    return f"This LPPL-MFDFA plot is part of the diagnostic set for `{ticker}`."
-
-
-def explain_fractal_mfdfa(stock: str) -> str:
-    return f"This MFDFA plot for `{stock}` summarizes how scaling behavior changes across fluctuation levels. More spread or curvature usually points to richer multifractal structure."
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 
 class DashboardState:
     def __init__(self) -> None:
         self._asset_map: dict[str, Path] = {}
         self._next_id = 1
+        self._lock = threading.Lock()
         self.manifest = self._build_manifest()
         self.manifest_json = json.dumps(self.manifest).encode("utf-8")
 
@@ -151,126 +57,70 @@ class DashboardState:
     def get_asset(self, asset_id: str) -> Path | None:
         return self._asset_map.get(asset_id)
 
-    def _build_manifest(self) -> dict[str, Any]:
-        mf_corr_dir = TRIAL_DIR / "mf_corr_plots"
-        lppl_dir = TRIAL_DIR / "lppl_mfdfa_v2_plots"
-        fractal_dir = TRIAL_DIR / "fractal_structure_results"
+    def reload(self) -> None:
+        with self._lock:
+            self._asset_map = {}
+            self._next_id = 1
+            self.manifest = self._build_manifest()
+            self.manifest_json = json.dumps(self.manifest).encode("utf-8")
 
+    def _build_manifest(self) -> dict[str, Any]:
         return {
             "title": "StockParticle Plot Dashboard",
-            "mf_corr": {
-                "title": "MF Correlation Plots",
-                "description": "All plots found under scripts/trial/mf_corr_plots.",
-                "images": [
-                    self.register_asset(
-                        path,
-                        title=pretty_label(path.stem),
-                        caption=relative_to_project(path),
-                        explanation=explain_mf_corr_plot(path),
-                    )
-                    for path in image_files(mf_corr_dir)
-                ],
-            },
-            "featured": {
-                "title": "Featured Attached Plots",
-                "description": "The three standalone plots provided for this dashboard.",
-                "images": self._build_featured_images(),
-            },
-            "lppl": {
-                "title": "LPPL-MFDFA Highlights",
-                "description": (
-                    "Curated to emphasize the two most informative plot types per ticker: the overall "
-                    "LPPL overview and the rolling trajectory. Residual-surrogate diagnostics are available "
-                    "as optional supporting plots."
-                ),
-                "tickers": self._build_lppl_groups(lppl_dir),
-            },
-            "fractal": {
-                "title": "Fractal Structure Results",
-                "description": (
-                    "Choose a stock to inspect all of its available fractal-structure output plots, grouped "
-                    "by analysis type."
-                ),
-                "stocks": self._build_fractal_groups(fractal_dir),
-            },
+            "multifractal": build_multifractal_section(self.register_asset),
+            "featured": build_featured_section(self.register_asset),
+            "lppl": build_lppl_section(self.register_asset),
         }
 
-    def _build_featured_images(self) -> list[dict[str, str]]:
-        featured = []
-        for item in ATTACHED_IMAGE_DEFAULTS:
-            image_path = resolve_featured_image(str(item["prefix"]))
-            if image_path is not None:
-                featured.append(
-                    self.register_asset(
-                        image_path,
-                        title=str(item["title"]),
-                        caption=str(item["caption"]),
-                        explanation=explain_featured_plot(str(item["title"])),
-                    )
-                )
-        return featured
 
-    def _build_lppl_groups(self, lppl_dir: Path) -> dict[str, Any]:
-        grouped: dict[str, dict[str, Any]] = {}
+def parse_lppl_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    tickers_raw = payload.get("tickers", "")
+    if isinstance(tickers_raw, list):
+        tickers = [str(value).strip() for value in tickers_raw if str(value).strip()]
+    else:
+        tickers = [value.strip() for value in str(tickers_raw).split(",") if value.strip()]
+    if not tickers:
+        raise ValueError("Provide at least one ticker.")
 
-        for path in image_files(lppl_dir):
-            stem = path.stem
-            if "_" not in stem:
-                continue
-            ticker, suffix = stem.split("_", 1)
-            entry = grouped.setdefault(ticker, {"highlights": [], "residuals": []})
+    offsets_raw = payload.get("window_start_offsets", "")
+    if isinstance(offsets_raw, list):
+        offsets = [int(value) for value in offsets_raw]
+    else:
+        offsets = [int(value.strip()) for value in str(offsets_raw).split(",") if value.strip()]
+    if not offsets:
+        raise ValueError("Provide at least one LPPL window offset.")
 
-            if suffix in {"overview", "rolling_trajectory"}:
-                entry["highlights"].append(
-                    self.register_asset(
-                        path,
-                        title=f"{ticker} {pretty_label(suffix)}",
-                        caption=relative_to_project(path),
-                        explanation=explain_lppl_plot(ticker, suffix),
-                    )
-                )
-            elif suffix.endswith("residuals_surrogate"):
-                window = suffix.split("_", 1)[0]
-                entry["residuals"].append(
-                    self.register_asset(
-                        path,
-                        title=f"{ticker} Residual Diagnostics {window.upper()}",
-                        caption=relative_to_project(path),
-                        explanation=explain_lppl_plot(ticker, suffix),
-                    )
-                )
+    return {
+        "tickers": tickers,
+        "start_data": str(payload.get("start_data", "2007-01-01")),
+        "end_data": str(payload.get("end_data", "2009-06-01")),
+        "target_date": str(payload.get("target_date", "2008-09-28")),
+        "window_start_offsets": offsets,
+        "roll_days": int(payload.get("roll_days", 60)),
+        "roll_step": int(payload.get("roll_step", 5)),
+        "plot_duration": int(payload.get("plot_duration", 150)),
+        "surrogate_n": int(payload.get("surrogate_n", 100)),
+    }
 
-        for ticker, data in grouped.items():
-            data["highlights"].sort(key=lambda item: 0 if "Overview" in item["title"] else 1)
-            data["residuals"].sort(key=lambda item: natural_sort_key(item["file_name"]))
-            data["summary"] = f"{ticker} LPPL and MFDFA view"
 
-        return dict(sorted(grouped.items(), key=lambda item: natural_sort_key(item[0])))
+def parse_multifractal_payload(payload: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+    group = str(payload.get("group", "")).strip()
+    if group not in MULTIFRACTAL_NOTEBOOK_SOURCES:
+        raise ValueError("Unknown multifractal notebook group.")
 
-    def _build_fractal_groups(self, fractal_dir: Path) -> dict[str, Any]:
-        grouped: dict[str, Any] = {}
+    overrides: dict[str, Any] = {
+        "OUT_DIR": MULTIFRACTAL_NOTEBOOK_SOURCES[group]["output_dir"].name,
+    }
+    if payload.get("tickers"):
+        overrides["TICKERS"] = [value.strip() for value in str(payload["tickers"]).split(",") if value.strip()]
+    if payload.get("start"):
+        overrides["START"] = str(payload["start"])
+    if payload.get("end"):
+        overrides["END"] = str(payload["end"])
+    if payload.get("sectors"):
+        overrides["SECTORS"] = payload["sectors"]
 
-        if not fractal_dir.exists():
-            return grouped
-
-        for stock_dir in sorted([path for path in fractal_dir.iterdir() if path.is_dir()], key=lambda path: natural_sort_key(path.name)):
-            mfdfa_dir = stock_dir / "mfdfa"
-            images = [
-                self.register_asset(
-                    path,
-                    title=pretty_label(path.stem),
-                    caption=relative_to_project(path),
-                    explanation=explain_fractal_mfdfa(stock_dir.name),
-                )
-                for path in image_files(mfdfa_dir)
-            ]
-            grouped[stock_dir.name] = {
-                "label": stock_dir.name,
-                "images": images,
-                "summary": f"MFDFA output for {stock_dir.name}",
-            }
-
-        return grouped
+    return group, overrides
 
 
 def html_shell() -> str:
@@ -280,12 +130,8 @@ def html_shell() -> str:
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>StockParticle</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
-
     :root{
       --bg:#06080d;
       --nav:#0a0d14;
@@ -294,35 +140,28 @@ def html_shell() -> str:
       --card-hover:#171c28;
       --ink:#b6beca;
       --bright:#e2e8f0;
-      --dim:#4a5568;
-      --line:rgba(255,255,255,0.05);
+      --dim:#617084;
+      --line:rgba(255,255,255,0.06);
       --blue:#4f9cf7;
       --purple:#8b5cf6;
       --teal:#2dd4bf;
       --pink:#ec4899;
-      --orange:#f59e0b;
+      --green:#16a34a;
+      --danger:#ef4444;
       --r:10px;
     }
-
-    html{height:100%}
-
+    html,body{height:100%}
     body{
       background:var(--bg);
       color:var(--ink);
-      font-family:'Inter',system-ui,-apple-system,sans-serif;
+      font-family:Inter,system-ui,-apple-system,sans-serif;
       font-size:14px;
       line-height:1.55;
-      -webkit-font-smoothing:antialiased;
       display:flex;
       height:100vh;
       overflow:hidden;
     }
-
     button,select,input{font:inherit;color:inherit}
-
-    ::selection{background:rgba(79,156,247,0.25)}
-
-    /* ── sidebar ── */
     .sidebar{
       width:240px;
       min-width:240px;
@@ -330,397 +169,174 @@ def html_shell() -> str:
       border-right:1px solid var(--line);
       display:flex;
       flex-direction:column;
-      padding:0;
-      overflow-y:auto;
     }
-
     .sidebar-brand{
       padding:24px 20px 20px;
       border-bottom:1px solid var(--line);
     }
-
-    .sidebar-brand h1{
-      font-size:1.05rem;
-      font-weight:700;
-      letter-spacing:-0.03em;
-      color:var(--bright);
-      margin-bottom:2px;
-    }
-
-    .sidebar-brand span{
-      font-size:0.75rem;
-      color:var(--dim);
-      letter-spacing:0.04em;
-      text-transform:uppercase;
-    }
-
-    .sidebar-nav{
-      padding:12px 10px;
-      flex:1;
-    }
-
-    .nav-label{
-      font-size:0.68rem;
-      font-weight:600;
-      text-transform:uppercase;
-      letter-spacing:0.08em;
-      color:var(--dim);
-      padding:14px 12px 6px;
-    }
-
+    .sidebar-brand h1{font-size:1.05rem;font-weight:700;color:var(--bright)}
+    .sidebar-brand span{font-size:0.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:0.04em}
+    .sidebar-nav{padding:12px 10px;flex:1}
+    .nav-label{font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--dim);padding:14px 12px 6px}
     .nav-item{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      width:100%;
-      border:0;
-      background:transparent;
-      color:var(--dim);
-      padding:9px 12px;
-      border-radius:8px;
-      cursor:pointer;
-      font-size:0.88rem;
-      font-weight:500;
-      transition:all .15s ease;
-      text-align:left;
+      display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;color:var(--dim);
+      padding:9px 12px;border-radius:8px;cursor:pointer;font-size:0.88rem;font-weight:500;text-align:left;
     }
-
-    .nav-item:hover{
-      background:rgba(255,255,255,0.04);
-      color:var(--ink);
-    }
-
-    .nav-item.active{
-      background:rgba(79,156,247,0.1);
-      color:var(--blue);
-    }
-
-    .nav-dot{
-      width:8px;height:8px;
-      border-radius:50%;
-      flex-shrink:0;
-    }
-
+    .nav-item:hover{background:rgba(255,255,255,0.04);color:var(--ink)}
+    .nav-item.active{background:rgba(79,156,247,0.1);color:var(--blue)}
+    .nav-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
     .dot-blue{background:var(--blue)}
     .dot-purple{background:var(--purple)}
     .dot-teal{background:var(--teal)}
-    .dot-pink{background:var(--pink)}
+    .main{flex:1;overflow-y:auto;background:var(--bg)}
 
-    /* ── main content ── */
-    .main{
-      flex:1;
-      overflow-y:auto;
-      background:
-        radial-gradient(ellipse 70% 30% at 30% 0%, rgba(79,156,247,0.04), transparent 70%),
-        radial-gradient(ellipse 50% 30% at 85% 100%, rgba(139,92,246,0.03), transparent 70%),
-        var(--bg);
+    #landing{
+      position:fixed;inset:0;z-index:200;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      text-align:center;padding:48px 32px;
+      background:var(--bg);
+      background-image:
+        radial-gradient(ellipse 70% 50% at 50% 0%, rgba(79,156,247,0.08), transparent 60%),
+        radial-gradient(ellipse 50% 40% at 80% 100%, rgba(139,92,246,0.06), transparent 60%),
+        radial-gradient(ellipse 35% 45% at 10% 80%, rgba(45,212,191,0.05), transparent 60%);
+      transition:opacity .5s ease, transform .5s ease;
     }
-
+    #landing.out{opacity:0;transform:scale(1.03);pointer-events:none}
+    .hero-icon{
+      width:80px;height:80px;border-radius:22px;
+      background:linear-gradient(135deg, rgba(79,156,247,0.15), rgba(139,92,246,0.15));
+      border:1px solid rgba(255,255,255,0.08);
+      display:flex;align-items:center;justify-content:center;
+      margin-bottom:32px;animation:hero-float 6s ease-in-out infinite;
+    }
+    @keyframes hero-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    .hero-icon svg{width:40px;height:40px;fill:none;stroke:var(--blue);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+    .hero-title{
+      font-size:clamp(2.4rem,5vw,3.8rem);font-weight:800;letter-spacing:-0.04em;
+      color:var(--bright);line-height:1.1;margin-bottom:18px;
+    }
+    .hero-title span{
+      background:linear-gradient(135deg,var(--blue),var(--purple));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+    .hero-sub{
+      font-size:1.1rem;color:var(--dim);max-width:54ch;line-height:1.75;margin-bottom:48px;
+    }
+    .hero-cards{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:20px;
+      max-width:960px;width:100%;
+    }
+    .hero-card{
+      background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px 24px;
+      text-align:left;cursor:pointer;
+      transition:border-color .25s, transform .25s, box-shadow .25s;
+    }
+    .hero-card:hover{
+      border-color:rgba(79,156,247,0.22);transform:translateY(-5px);
+      box-shadow:0 20px 48px -12px rgba(0,0,0,0.5);
+    }
+    .hero-card-dot{width:10px;height:10px;border-radius:50%;margin-bottom:14px}
+    .hero-card h3{font-size:1.04rem;font-weight:600;color:var(--bright);margin-bottom:8px}
+    .hero-card p{font-size:0.88rem;color:var(--dim);line-height:1.6}
+    .hero-card .hero-card-count{
+      display:inline-block;margin-top:14px;font-size:0.78rem;font-weight:600;
+      color:var(--ink);background:rgba(255,255,255,0.05);padding:4px 10px;border-radius:6px;
+    }
+    .hero-footer{
+      margin-top:52px;display:flex;gap:36px;flex-wrap:wrap;justify-content:center;
+    }
+    .hero-stat{text-align:center}
+    .hero-stat-value{font-size:1.9rem;font-weight:700;color:var(--bright);letter-spacing:-0.03em}
+    .hero-stat-label{font-size:0.74rem;color:var(--dim);text-transform:uppercase;letter-spacing:0.06em;margin-top:3px}
+    .hero-tagline{
+      margin-top:56px;font-size:0.82rem;color:var(--dim);letter-spacing:0.02em;
+    }
+    .hero-tagline kbd{
+      display:inline-block;padding:2px 8px;border:1px solid var(--line);border-radius:5px;
+      background:var(--surface);font-size:0.78rem;font-family:inherit;margin:0 2px;
+    }
     .topbar{
-      position:sticky;
-      top:0;
-      z-index:20;
-      background:rgba(6,8,13,0.85);
-      backdrop-filter:blur(16px);
-      -webkit-backdrop-filter:blur(16px);
-      border-bottom:1px solid var(--line);
-      padding:16px 32px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
+      position:sticky;top:0;z-index:20;background:rgba(6,8,13,0.9);backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--line);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;
     }
-
-    .topbar h2{
-      font-size:1rem;
-      font-weight:600;
-      color:var(--bright);
+    .topbar h2{font-size:1rem;font-weight:600;color:var(--bright)}
+    .topbar-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .topbar-controls label,.field label{font-size:0.75rem;color:var(--dim);text-transform:uppercase;letter-spacing:0.05em;font-weight:600}
+    select,input{
+      border:1px solid var(--line);background:var(--surface);padding:8px 12px;border-radius:8px;outline:none;
     }
-
-    .topbar-controls{
-      display:flex;
-      gap:10px;
-      align-items:center;
+    input[type="date"]{min-width:160px}
+    .content{padding:28px 32px 64px}
+    .section-desc{color:var(--dim);font-size:0.92rem;max-width:72ch;margin-bottom:24px;line-height:1.65}
+    .subtle{color:var(--dim);font-size:0.84rem}
+    .grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;transition:border-color .2s, transform .2s ease}
+    .card:hover{border-color:rgba(79,156,247,0.18);transform:translateY(-3px)}
+    .card-button{display:block;width:100%;border:0;padding:0;background:transparent;text-align:left;cursor:pointer;color:inherit}
+    .card-img-wrap{position:relative;overflow:hidden}
+    .card-img-wrap img{display:block;width:100%;height:auto}
+    .card-body{padding:14px 16px 16px}
+    .card-body h3{font-size:0.92rem;font-weight:600;color:var(--bright);margin-bottom:6px}
+    .card-explanation{color:var(--dim);font-size:0.84rem;line-height:1.55}
+    .empty,.loading{color:var(--dim);padding:28px 0}
+    .group-block{margin-bottom:28px}
+    .group-block h3{font-size:0.98rem;color:var(--bright);margin-bottom:6px}
+    .toolbar-form{
+      margin:20px 0 28px;padding:18px;border:1px solid var(--line);border-radius:12px;background:var(--surface);
+      display:grid;gap:14px;
     }
-
-    .topbar-controls label{
-      font-size:0.78rem;
-      color:var(--dim);
-      text-transform:uppercase;
-      letter-spacing:0.05em;
-      font-weight:600;
+    .field-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+    .field{display:grid;gap:6px}
+    .field-wide{grid-column:1 / -1}
+    .form-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .button-primary{
+      border:1px solid rgba(79,156,247,0.35);background:rgba(79,156,247,0.16);color:#dbeafe;padding:9px 14px;border-radius:8px;cursor:pointer;font-weight:600;
     }
-
-    select{
-      border:1px solid var(--line);
-      background:var(--surface);
-      padding:7px 12px;
-      border-radius:8px;
-      outline:none;
-      transition:border-color .2s;
-      font-size:0.88rem;
-    }
-
-    select:focus{border-color:var(--blue)}
-
-    .content{
-      padding:28px 32px 64px;
-    }
-
-    .section-desc{
-      color:var(--dim);
-      font-size:0.92rem;
-      max-width:64ch;
-      margin-bottom:24px;
-      line-height:1.65;
-    }
-
-    /* ── card grid ── */
-    .grid{
-      display:grid;
-      gap:20px;
-      grid-template-columns:repeat(auto-fill,minmax(360px,1fr));
-    }
-
-    .card{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:var(--r);
-      overflow:hidden;
-      position:relative;
-      transition:border-color .2s, transform .2s ease, box-shadow .2s ease;
-    }
-
-    .card:hover{
-      border-color:rgba(79,156,247,0.18);
-      transform:translateY(-4px) scale(1.005);
-      box-shadow:0 20px 40px -12px rgba(0,0,0,0.5);
-    }
-
-    .card-button{
-      display:block;
-      width:100%;
-      border:0;padding:0;
-      background:transparent;
-      text-align:left;
-      cursor:pointer;
-      color:inherit;
-    }
-
-    .card-img-wrap{
-      position:relative;
-      overflow:hidden;
-    }
-
-    .card-img-wrap img{
-      display:block;
-      width:100%;
-      height:auto;
-      transition:transform .3s ease;
-    }
-
-    .card:hover .card-img-wrap img{
-      transform:scale(1.03);
-    }
-
-    .card-overlay{
-      position:absolute;
-      inset:0;
-      background:linear-gradient(180deg, transparent 40%, rgba(6,8,13,0.85) 100%);
-      opacity:0;
-      transition:opacity .25s ease;
-      display:flex;
-      align-items:flex-end;
-      padding:16px;
-    }
-
-    .card:hover .card-overlay{
-      opacity:1;
-    }
-
-    .card-overlay span{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      background:rgba(255,255,255,0.12);
-      backdrop-filter:blur(12px);
-      -webkit-backdrop-filter:blur(12px);
-      padding:7px 14px;
-      border-radius:20px;
-      font-size:0.82rem;
-      font-weight:500;
-      color:#fff;
-    }
-
-    .card-overlay svg{
-      width:14px;height:14px;
-      fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
-    }
-
-    .card-body{
-      padding:14px 16px 16px;
-    }
-
-    .card-body h3{
-      font-size:0.92rem;
-      font-weight:600;
-      color:var(--bright);
-      margin-bottom:6px;
-    }
-
-    .card-explanation{
-      color:var(--dim);
-      font-size:0.84rem;
-      line-height:1.55;
-    }
-
-    /* ── details toggle ── */
-    .details-section{
-      margin-top:32px;
-      border-top:1px solid var(--line);
-      padding-top:22px;
-    }
-
+    .button-primary[disabled]{opacity:.65;cursor:progress}
+    .status-ok{color:#86efac}
+    .status-error{color:#fca5a5}
+    .details-section{margin-top:28px;border-top:1px solid var(--line);padding-top:20px}
     .details-toggle{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      border:1px solid var(--line);
-      background:var(--surface);
-      color:var(--dim);
-      padding:8px 16px;
-      border-radius:8px;
-      cursor:pointer;
-      font-size:0.85rem;
-      font-weight:500;
-      margin-bottom:18px;
-      transition:all .15s;
+      display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);color:var(--dim);
+      padding:8px 16px;border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:500;margin-bottom:18px;
     }
-
-    .details-toggle:hover{
-      border-color:rgba(255,255,255,0.12);
-      color:var(--ink);
-    }
-
-    .details-toggle svg{
-      width:14px;height:14px;
-      fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
-      transition:transform .2s;
-    }
-
-    .details-toggle.open svg{
-      transform:rotate(180deg);
-    }
-
-    .details-grid{
-      display:none;
-    }
-
-    .details-grid.open{
-      display:grid;
-    }
-
-    .empty{color:var(--dim);padding:20px 0}
-
-    .loading{color:var(--dim);padding:48px 0}
-
-    /* ── modal ── */
-    .modal{
-      position:fixed;inset:0;
-      display:none;
-      align-items:center;justify-content:center;
-      padding:32px;
-      background:rgba(3,4,8,0.9);
-      backdrop-filter:blur(16px);
-      -webkit-backdrop-filter:blur(16px);
-      z-index:100;
-    }
-
+    .details-grid{display:none}
+    .details-grid.open{display:grid}
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:32px;background:rgba(3,4,8,0.9);z-index:100}
     .modal.open{display:flex}
-
     .modal-dialog{
-      width:min(1140px,100%);
-      max-height:calc(100vh - 64px);
-      overflow-y:auto;
-      background:var(--surface);
-      border:1px solid rgba(255,255,255,0.07);
-      border-radius:14px;
-      box-shadow:0 32px 80px rgba(0,0,0,0.6);
-      animation:modalIn .2s ease;
+      width:min(1140px,100%);max-height:calc(100vh - 64px);overflow-y:auto;background:var(--surface);border:1px solid rgba(255,255,255,0.07);border-radius:14px;
     }
-
-    @keyframes modalIn{
-      from{opacity:0;transform:scale(0.97) translateY(8px)}
-      to{opacity:1;transform:scale(1) translateY(0)}
-    }
-
-    .modal-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:start;
-      padding:20px 24px 14px;
-      border-bottom:1px solid var(--line);
-    }
-
-    .modal-header h2{
-      font-size:1.05rem;
-      font-weight:600;
-      color:var(--bright);
-    }
-
-    .modal-close{
-      border:1px solid var(--line);
-      background:var(--card);
-      padding:6px 14px;
-      border-radius:7px;
-      cursor:pointer;
-      font-size:0.82rem;
-      font-weight:500;
-      transition:all .12s;
-      flex-shrink:0;
-      color:var(--dim);
-    }
-
-    .modal-close:hover{
-      background:var(--card-hover);
-      color:var(--bright);
-      border-color:rgba(255,255,255,0.12);
-    }
-
+    .modal-header{display:flex;justify-content:space-between;align-items:start;padding:20px 24px 14px;border-bottom:1px solid var(--line)}
+    .modal-header h2{font-size:1.05rem;font-weight:600;color:var(--bright)}
+    .modal-close{border:1px solid var(--line);background:var(--card);padding:6px 14px;border-radius:7px;cursor:pointer;font-size:0.82rem;color:var(--dim)}
     .modal-body{padding:20px 24px 24px}
-
-    .modal-body img{
-      display:block;
-      width:100%;height:auto;
-      border-radius:8px;
-      border:1px solid var(--line);
-      margin-bottom:18px;
-    }
-
-    .modal-explanation{
-      color:var(--ink);
-      font-size:0.94rem;
-      line-height:1.65;
-      max-width:72ch;
-    }
-
-    ::-webkit-scrollbar{width:7px;height:7px}
-    ::-webkit-scrollbar-track{background:transparent}
-    ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:4px}
-    ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.14)}
-
-    @media(max-width:800px){
+    .modal-body img{display:block;width:100%;height:auto;border-radius:8px;border:1px solid var(--line);margin-bottom:18px}
+    .modal-explanation{color:var(--ink);font-size:0.94rem;line-height:1.65;max-width:72ch}
+    @media(max-width:900px){
       body{flex-direction:column}
-      .sidebar{width:100%;min-width:100%;height:auto;flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line)}
-      .sidebar-brand{display:none}
-      .sidebar-nav{display:flex;gap:4px;padding:8px;flex:0}
-      .nav-label{display:none}
+      .sidebar{width:100%;min-width:100%;border-right:0;border-bottom:1px solid var(--line)}
       .content{padding:20px 16px 48px}
-      .grid{grid-template-columns:1fr}
-      .modal{padding:12px}
+      .topbar{padding:14px 16px;align-items:start;flex-direction:column}
     }
   </style>
 </head>
 <body>
+  <div id="landing">
+    <div class="hero-icon">
+      <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 5 5-9"/></svg>
+    </div>
+    <h1 class="hero-title">Stock<span>Particle</span></h1>
+    <p class="hero-sub">
+      Multifractal analysis, LPPL crash diagnostics, and correlation structure
+      for equities, commodities, and crypto &mdash; driven directly from Jupyter notebooks.
+    </p>
+    <div class="hero-cards" id="hero-cards"></div>
+    <div class="hero-footer" id="hero-footer"></div>
+    <p class="hero-tagline">Select a section above to explore, or use the sidebar anytime.</p>
+  </div>
+
   <aside class="sidebar">
     <div class="sidebar-brand">
       <h1>StockParticle</h1>
@@ -732,11 +348,11 @@ def html_shell() -> str:
   </aside>
 
   <div class="main">
-    <div class="topbar" id="topbar">
-      <h2 id="topbar-title">Loading...</h2>
+    <div class="topbar">
+      <h2 id="topbar-title">StockParticle</h2>
       <div class="topbar-controls" id="topbar-controls"></div>
     </div>
-    <div class="content" id="app"><div class="loading">Loading plots...</div></div>
+    <div class="content" id="app"><div class="loading" style="text-align:center;padding:120px 20px;color:var(--dim)">Loading dashboard&hellip;</div></div>
   </div>
 
   <div class="modal" id="modal" aria-hidden="true">
@@ -753,8 +369,6 @@ def html_shell() -> str:
   </div>
 
   <script>
-    const EXPAND_ICON = `<svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`;
-
     const nav = document.getElementById("sidebar-nav");
     const topbarTitle = document.getElementById("topbar-title");
     const topbarControls = document.getElementById("topbar-controls");
@@ -765,144 +379,367 @@ def html_shell() -> str:
     const modalExplanation = document.getElementById("modal-explanation");
     const modalClose = document.getElementById("modal-close");
 
-    const esc = (v) => String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+    const TABS = [
+      {id:"multifractal", label:"Multifractal", dot:"dot-blue"},
+      {id:"featured", label:"Attached Plots", dot:"dot-purple"},
+      {id:"lppl", label:"LPPL-MFDFA", dot:"dot-teal"},
+    ];
+
+    const esc = (v) => String(v)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
+    const sanitizeTicker = (value) => String(value).replace(/^\\^/, "").replace(/=/g, "_");
+
+    const landing = document.getElementById("landing");
+    const heroCardsEl = document.getElementById("hero-cards");
+    const heroFooterEl = document.getElementById("hero-footer");
+    let landingVisible = true;
+
+    let manifest = null;
+    let activeTab = "multifractal";
+    let activeMfGroup = "mf_plots";
+    let activeLpplTicker = "";
+    let mfStatus = "";
+    let mfStatusClass = "";
+    let mfRunning = false;
+    let lpplStatus = "";
+    let lpplStatusClass = "";
+    let lpplRunning = false;
 
     function card(image) {
-      const p = esc(JSON.stringify(image));
-      return `<article class="card"><button class="card-button" type="button" data-image="${p}"><div class="card-img-wrap"><img src="${image.src}" alt="${esc(image.title)}"><div class="card-overlay"><span>${EXPAND_ICON} Expand</span></div></div><div class="card-body"><h3>${esc(image.title)}</h3><div class="card-explanation">${esc(image.explanation||"")}</div></div></button></article>`;
+      const payload = esc(JSON.stringify(image));
+      return `<article class="card"><button class="card-button" type="button" data-image="${payload}"><div class="card-img-wrap"><img src="${image.src}" alt="${esc(image.title)}"></div><div class="card-body"><h3>${esc(image.title)}</h3><div class="card-explanation">${esc(image.explanation || "")}</div></div></button></article>`;
     }
 
     const empty = (msg) => `<div class="empty">${esc(msg)}</div>`;
     const grid = (images) => images.length ? `<div class="grid">${images.map(card).join("")}</div>` : empty("No plots found.");
-
-    const TABS = [
-      {id:"mf-corr", label:"MF Correlation", dot:"dot-blue"},
-      {id:"featured", label:"Attached Plots", dot:"dot-purple"},
-      {id:"lppl", label:"LPPL-MFDFA", dot:"dot-teal"},
-      {id:"fractal", label:"Fractal MFDFA", dot:"dot-pink"},
-    ];
-
-    let manifest = null;
-    let activeTab = "mf-corr";
+    const sourceInfo = (source) => source ? `<div class="subtle">Notebook source: <code>${esc(source.notebook)}</code> cell <code>${esc(source.cell_index)}</code> -> <code>${esc(source.output_dir)}</code>${source.legacy_cell_index !== undefined ? `, legacy LPPL cell <code>${esc(source.legacy_cell_index)}</code>` : ""}</div>` : "";
 
     function buildNav() {
-      const items = TABS.map(t =>
-        `<button class="nav-item ${t.id===activeTab?"active":""}" data-tab="${t.id}" type="button"><span class="nav-dot ${t.dot}"></span>${esc(t.label)}</button>`
+      const items = TABS.map((tab) =>
+        `<button class="nav-item ${tab.id===activeTab?"active":""}" data-tab="${tab.id}" type="button"><span class="nav-dot ${tab.dot}"></span>${esc(tab.label)}</button>`
       ).join("");
       nav.innerHTML = `<div class="nav-label">Views</div>${items}`;
-      nav.querySelectorAll(".nav-item").forEach(b => {
-        b.addEventListener("click", () => { activeTab = b.dataset.tab; render(); });
+      nav.querySelectorAll(".nav-item").forEach((button) => {
+        button.addEventListener("click", () => {
+          activeTab = button.dataset.tab;
+          render();
+        });
       });
     }
 
-    function render() {
-      if (!manifest) return;
-      buildNav();
-
-      switch(activeTab) {
-        case "mf-corr":
-          topbarTitle.textContent = "MF Correlation Plots";
-          topbarControls.innerHTML = "";
-          app.innerHTML = `<p class="section-desc">${esc(manifest.mf_corr.description)}</p>${grid(manifest.mf_corr.images)}`;
-          break;
-        case "featured":
-          topbarTitle.textContent = "Attached Plots";
-          topbarControls.innerHTML = "";
-          app.innerHTML = `<p class="section-desc">${esc(manifest.featured.description)}</p>${grid(manifest.featured.images)}`;
-          break;
-        case "lppl":
-          renderLppl();
-          break;
-        case "fractal":
-          renderFractal();
-          break;
-      }
-
-      mountCards();
-    }
-
-    function renderLppl() {
-      const tickers = Object.keys(manifest.lppl.tickers);
-      topbarTitle.textContent = "LPPL-MFDFA Highlights";
-
-      if (!tickers.length) {
-        topbarControls.innerHTML = "";
-        app.innerHTML = empty("No LPPL-MFDFA plots found.");
-        return;
-      }
-
-      const sel = topbarControls.querySelector("#lppl-select");
-      const current = sel ? sel.value : tickers[0];
-      topbarControls.innerHTML = `<label for="lppl-select">Ticker</label><select id="lppl-select">${tickers.map(t=>`<option value="${esc(t)}" ${t===current?"selected":""}>${esc(t)}</option>`).join("")}</select>`;
-
-      const entry = manifest.lppl.tickers[current];
-      const hl = grid(entry.highlights);
-      const res = entry.residuals.length
-        ? `<div class="details-section"><button class="details-toggle" type="button" id="res-toggle"><span>Residual diagnostics (${entry.residuals.length})</span><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button><div class="details-grid grid" id="res-grid">${entry.residuals.map(card).join("")}</div></div>`
-        : "";
-
-      app.innerHTML = `<p class="section-desc">${esc(manifest.lppl.description)}</p>${hl}${res}`;
-
-      document.getElementById("lppl-select").addEventListener("change", () => { renderLppl(); mountCards(); });
-
-      const toggle = document.getElementById("res-toggle");
-      const resGrid = document.getElementById("res-grid");
-      if (toggle && resGrid) {
-        toggle.addEventListener("click", () => {
-          toggle.classList.toggle("open");
-          resGrid.classList.toggle("open");
-        });
-      }
-    }
-
-    function renderFractal() {
-      const stocks = Object.keys(manifest.fractal.stocks);
-      topbarTitle.textContent = "Fractal MFDFA";
-
-      if (!stocks.length) {
-        topbarControls.innerHTML = "";
-        app.innerHTML = empty("No fractal structure results found.");
-        return;
-      }
-
-      const sel = topbarControls.querySelector("#fractal-select");
-      const current = sel ? sel.value : stocks[0];
-      topbarControls.innerHTML = `<label for="fractal-select">Stock</label><select id="fractal-select">${stocks.map(s=>`<option value="${esc(s)}" ${s===current?"selected":""}>${esc(s)}</option>`).join("")}</select>`;
-
-      const entry = manifest.fractal.stocks[current];
-      app.innerHTML = `<p class="section-desc">${esc(manifest.fractal.description)}</p>${grid(entry.images)}`;
-
-      document.getElementById("fractal-select").addEventListener("change", () => { renderFractal(); mountCards(); });
-    }
-
     function mountCards() {
-      document.querySelectorAll(".card-button").forEach(b => {
-        b.addEventListener("click", () => {
-          const img = JSON.parse(b.dataset.image);
-          modalTitle.textContent = img.title;
-          modalImage.src = img.src;
-          modalImage.alt = img.title;
-          modalExplanation.textContent = img.explanation || "";
+      document.querySelectorAll(".card-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          const image = JSON.parse(button.dataset.image);
+          modalTitle.textContent = image.title;
+          modalImage.src = image.src;
+          modalImage.alt = image.title;
+          modalExplanation.textContent = image.explanation || "";
           modal.classList.add("open");
-          modal.setAttribute("aria-hidden","false");
+          modal.setAttribute("aria-hidden", "false");
         });
       });
     }
 
     function closeModal() {
       modal.classList.remove("open");
-      modal.setAttribute("aria-hidden","true");
+      modal.setAttribute("aria-hidden", "true");
       modalImage.src = "";
     }
 
+    function countImages(obj) {
+      if (!obj) return 0;
+      if (Array.isArray(obj.images)) return obj.images.length;
+      let total = 0;
+      if (obj.groups) { for (const k of Object.keys(obj.groups)) total += countImages(obj.groups[k]); }
+      if (obj.tickers) { for (const k of Object.keys(obj.tickers)) { const e = obj.tickers[k]; total += (e.highlights||[]).length + (e.residuals||[]).length; } }
+      return total;
+    }
+
+    function dismissLanding(tab) {
+      activeTab = tab;
+      landingVisible = false;
+      landing.classList.add("out");
+      landing.addEventListener("transitionend", () => { landing.style.display = "none"; }, {once:true});
+      render();
+    }
+
+    function populateLanding() {
+      const mfCount = countImages(manifest.multifractal);
+      const featCount = countImages(manifest.featured);
+      const lpplCount = countImages(manifest.lppl);
+      const totalPlots = mfCount + featCount + lpplCount;
+      const lpplTickers = Object.keys(manifest.lppl.tickers || {}).length;
+
+      heroCardsEl.innerHTML = `
+        <div class="hero-card" data-goto="multifractal">
+          <div class="hero-card-dot dot-blue"></div>
+          <h3>Multifractal Analysis</h3>
+          <p>MF-DFA return structure and symmetric Pearson correlation across sectors and asset classes.</p>
+          <span class="hero-card-count">${mfCount} plots</span>
+        </div>
+        <div class="hero-card" data-goto="lppl">
+          <div class="hero-card-dot dot-teal"></div>
+          <h3>LPPL-MFDFA</h3>
+          <p>Log-periodic power law fits with rolling multifractal residual diagnostics and surrogate tests.</p>
+          <span class="hero-card-count">${lpplTickers} tickers &middot; ${lpplCount} plots</span>
+        </div>
+        <div class="hero-card" data-goto="featured">
+          <div class="hero-card-dot dot-purple"></div>
+          <h3>Featured Plots</h3>
+          <p>Standalone reference figures including drawdown distributions and pairwise correlation heatmaps.</p>
+          <span class="hero-card-count">${featCount} plots</span>
+        </div>`;
+
+      heroFooterEl.innerHTML = `
+        <div class="hero-stat">
+          <div class="hero-stat-value">${totalPlots}</div>
+          <div class="hero-stat-label">Total Plots</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">3</div>
+          <div class="hero-stat-label">Notebook Cells</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value">${lpplTickers}</div>
+          <div class="hero-stat-label">LPPL Tickers</div>
+        </div>`;
+
+      heroCardsEl.querySelectorAll(".hero-card[data-goto]").forEach((card) => {
+        card.addEventListener("click", () => dismissLanding(card.dataset.goto));
+      });
+    }
+
+    function renderFeatured() {
+      topbarTitle.textContent = manifest.featured.title;
+      topbarControls.innerHTML = "";
+      app.innerHTML = `<p class="section-desc">${esc(manifest.featured.description)}</p>${grid(manifest.featured.images)}`;
+    }
+
+    function renderMultifractal() {
+      const groups = manifest.multifractal.groups;
+      const keys = Object.keys(groups);
+      if (!keys.includes(activeMfGroup)) {
+        activeMfGroup = keys[0] || "mf_plots";
+      }
+      const group = groups[activeMfGroup];
+      topbarTitle.textContent = manifest.multifractal.title;
+      topbarControls.innerHTML = `<label for="mf-group-select">Source</label><select id="mf-group-select">${keys.map((key) => `<option value="${esc(key)}" ${key===activeMfGroup?"selected":""}>${esc(groups[key].title)}</option>`).join("")}</select>`;
+      const mfStatusHtml = mfStatus ? `<div class="${esc(mfStatusClass)}">${esc(mfStatus)}</div>` : `<div class="subtle">Use refresh to rerun the exact notebook cell that owns this section.</div>`;
+      app.innerHTML = `<p class="section-desc">${esc(manifest.multifractal.description)}</p><div class="toolbar-form"><div class="form-actions"><button class="button-primary" id="mf-refresh" type="button" ${mfRunning ? "disabled" : ""}>${mfRunning ? "Running..." : "Refresh From Notebook Cell"}</button>${mfStatusHtml}</div>${sourceInfo(group.source)}</div><div class="group-block"><h3>${esc(group.title)}</h3><p class="section-desc">${esc(group.description)}</p>${grid(group.images)}</div>`;
+      const select = document.getElementById("mf-group-select");
+      if (select) {
+        select.addEventListener("change", () => {
+          activeMfGroup = select.value;
+          renderMultifractal();
+          mountCards();
+        });
+      }
+      const refreshButton = document.getElementById("mf-refresh");
+      if (refreshButton) {
+        refreshButton.addEventListener("click", async () => {
+          mfRunning = true;
+          mfStatus = `Running ${group.source.notebook} cell ${group.source.cell_index}...`;
+          mfStatusClass = "subtle";
+          renderMultifractal();
+          mountCards();
+          try {
+            const response = await fetch("/api/multifractal/run", {
+              method: "POST",
+              headers: {"Content-Type": "application/json"},
+              body: JSON.stringify({group: activeMfGroup}),
+            });
+            const result = await response.json();
+            if (!response.ok) {
+              throw new Error(result.error || "Multifractal refresh failed.");
+            }
+            manifest = result.manifest;
+            mfStatus = `Notebook cell ran. ${result.changed_count} files changed in ${result.output_dir}.`;
+            mfStatusClass = "status-ok";
+          } catch (error) {
+            mfStatus = error.message || "Multifractal refresh failed.";
+            mfStatusClass = "status-error";
+          } finally {
+            mfRunning = false;
+            renderMultifractal();
+            mountCards();
+          }
+        });
+      }
+    }
+
+    function lpplForm(defaults) {
+      const statusHtml = lpplStatus ? `<div class="${esc(lpplStatusClass)}">${esc(lpplStatus)}</div>` : `<div class="subtle">Run the current LPPL notebook cell here, then the tab refreshes from the output folder automatically.</div>`;
+      return `
+        <form id="lppl-form" class="toolbar-form">
+          <div class="field-grid">
+            <div class="field field-wide">
+              <label for="tickers">Tickers</label>
+              <input id="tickers" name="tickers" type="text" value="${esc(defaults.tickers.join(","))}">
+            </div>
+            <div class="field">
+              <label for="start_data">Start Date</label>
+              <input id="start_data" name="start_data" type="date" value="${esc(defaults.start_data)}">
+            </div>
+            <div class="field">
+              <label for="end_data">End Date</label>
+              <input id="end_data" name="end_data" type="date" value="${esc(defaults.end_data)}">
+            </div>
+            <div class="field">
+              <label for="target_date">Target Date</label>
+              <input id="target_date" name="target_date" type="date" value="${esc(defaults.target_date)}">
+            </div>
+            <div class="field">
+              <label for="window_start_offsets">Window Offsets</label>
+              <input id="window_start_offsets" name="window_start_offsets" type="text" value="${esc(defaults.window_start_offsets.join(","))}">
+            </div>
+            <div class="field">
+              <label for="roll_days">Roll Days</label>
+              <input id="roll_days" name="roll_days" type="number" value="${esc(defaults.roll_days)}">
+            </div>
+            <div class="field">
+              <label for="roll_step">Roll Step</label>
+              <input id="roll_step" name="roll_step" type="number" value="${esc(defaults.roll_step)}">
+            </div>
+            <div class="field">
+              <label for="plot_duration">Plot Duration</label>
+              <input id="plot_duration" name="plot_duration" type="number" value="${esc(defaults.plot_duration)}">
+            </div>
+            <div class="field">
+              <label for="surrogate_n">Surrogates</label>
+              <input id="surrogate_n" name="surrogate_n" type="number" value="${esc(defaults.surrogate_n)}">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="button-primary" id="lppl-submit" type="submit" ${lpplRunning ? "disabled" : ""}>${lpplRunning ? "Running..." : "Run LPPL Generation"}</button>
+            ${statusHtml}
+          </div>
+          ${sourceInfo(manifest.lppl.source)}
+        </form>
+      `;
+    }
+
+    function renderLppl() {
+      const tickers = Object.keys(manifest.lppl.tickers);
+      if (!activeLpplTicker || !manifest.lppl.tickers[activeLpplTicker]) {
+        activeLpplTicker = tickers[0] || "";
+      }
+
+      topbarTitle.textContent = manifest.lppl.title;
+      if (tickers.length) {
+        topbarControls.innerHTML = `<label for="lppl-select">Ticker</label><select id="lppl-select">${tickers.map((ticker) => `<option value="${esc(ticker)}" ${ticker===activeLpplTicker?"selected":""}>${esc(ticker)}</option>`).join("")}</select>`;
+      } else {
+        topbarControls.innerHTML = "";
+      }
+
+      const defaults = manifest.lppl.defaults;
+      const entry = activeLpplTicker ? manifest.lppl.tickers[activeLpplTicker] : null;
+      const highlights = entry ? grid(entry.highlights) : empty("No LPPL plots found.");
+      const residuals = entry && entry.residuals.length
+        ? `<div class="details-section"><button class="details-toggle" type="button" id="res-toggle">Residual diagnostics (${entry.residuals.length})</button><div class="details-grid grid" id="res-grid">${entry.residuals.map(card).join("")}</div></div>`
+        : "";
+
+      app.innerHTML = `<p class="section-desc">${esc(manifest.lppl.description)}</p>${lpplForm(defaults)}${entry ? highlights : empty("No LPPL plots found yet.")}${residuals}`;
+
+      const select = document.getElementById("lppl-select");
+      if (select) {
+        select.addEventListener("change", () => {
+          activeLpplTicker = select.value;
+          renderLppl();
+          mountCards();
+        });
+      }
+
+      const toggle = document.getElementById("res-toggle");
+      const residualGrid = document.getElementById("res-grid");
+      if (toggle && residualGrid) {
+        toggle.addEventListener("click", () => residualGrid.classList.toggle("open"));
+      }
+
+      bindLpplForm();
+    }
+
+    function bindLpplForm() {
+      const form = document.getElementById("lppl-form");
+      if (!form) return;
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const data = new FormData(form);
+        const payload = Object.fromEntries(data.entries());
+        lpplRunning = true;
+        lpplStatus = `Running ${manifest.lppl.source.notebook} cell ${manifest.lppl.source.cell_index}...`;
+        lpplStatusClass = "subtle";
+        renderLppl();
+        mountCards();
+        try {
+          const response = await fetch("/api/lppl/run", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload),
+          });
+          const result = await response.json();
+          if (!response.ok) {
+            throw new Error(result.error || "LPPL generation failed.");
+          }
+          manifest = result.manifest;
+          const requested = String(payload.tickers || "").split(",").map((value) => value.trim()).filter(Boolean);
+          const preferredTicker = requested.length ? sanitizeTicker(requested[0]) : activeLpplTicker;
+          if (manifest.lppl.tickers[preferredTicker]) {
+            activeLpplTicker = preferredTicker;
+          }
+          lpplStatus = `Notebook cell ran. ${result.changed_count} files changed in ${result.output_dir}.`;
+          lpplStatusClass = "status-ok";
+        } catch (error) {
+          lpplStatus = error.message || "LPPL generation failed.";
+          lpplStatusClass = "status-error";
+        } finally {
+          lpplRunning = false;
+          renderLppl();
+          mountCards();
+        }
+      });
+    }
+
+    function render() {
+      if (!manifest) return;
+      buildNav();
+      switch (activeTab) {
+        case "multifractal":
+          renderMultifractal();
+          break;
+        case "featured":
+          renderFeatured();
+          break;
+        case "lppl":
+          renderLppl();
+          break;
+      }
+      mountCards();
+    }
+
     modalClose.addEventListener("click", closeModal);
-    modal.addEventListener("click", e => { if(e.target===modal) closeModal(); });
-    document.addEventListener("keydown", e => { if(e.key==="Escape" && modal.classList.contains("open")) closeModal(); });
+    modal.addEventListener("click", (event) => { if (event.target === modal) closeModal(); });
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape" && modal.classList.contains("open")) closeModal(); });
 
     fetch("/api/manifest")
-      .then(r => { if(!r.ok) throw new Error("Load failed"); return r.json(); })
-      .then(data => { manifest = data; render(); })
-      .catch(err => { app.innerHTML = `<div class="empty">Could not load data. ${esc(err.message)}</div>`; });
+      .then((response) => {
+        if (!response.ok) throw new Error("Load failed");
+        return response.json();
+      })
+      .then((data) => {
+        manifest = data;
+        populateLanding();
+        render();
+      })
+      .catch((error) => {
+        app.innerHTML = `<div class="empty">Could not load data. ${esc(error.message)}</div>`;
+        landing.classList.add("out");
+      });
   </script>
 </body>
 </html>
@@ -910,7 +747,7 @@ def html_shell() -> str:
 
 
 class DashboardHandler(BaseHTTPRequestHandler):
-    server_version = "StockParticleDashboard/1.0"
+    server_version = "StockParticleDashboard/2.0"
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
@@ -939,13 +776,11 @@ class DashboardHandler(BaseHTTPRequestHandler):
             if asset_path is None or not asset_path.exists():
                 self.send_error(HTTPStatus.NOT_FOUND, "Asset not found")
                 return
-
             try:
                 data = asset_path.read_bytes()
             except OSError:
                 self.send_error(HTTPStatus.INTERNAL_SERVER_ERROR, "Could not read asset")
                 return
-
             content_type, _ = mimetypes.guess_type(asset_path.name)
             self.send_response(HTTPStatus.OK)
             self.send_header("Content-Type", content_type or "application/octet-stream")
@@ -955,6 +790,66 @@ class DashboardHandler(BaseHTTPRequestHandler):
             return
 
         self.send_error(HTTPStatus.NOT_FOUND, "Route not found")
+
+    def do_POST(self) -> None:
+        parsed = urlparse(self.path)
+        if parsed.path not in {"/api/lppl/run", "/api/multifractal/run"}:
+            self.send_error(HTTPStatus.NOT_FOUND, "Route not found")
+            return
+
+        try:
+            content_length = int(self.headers.get("Content-Length", "0"))
+            payload = json.loads(self.rfile.read(content_length).decode("utf-8") or "{}")
+
+            if parsed.path == "/api/multifractal/run":
+                group, overrides = parse_multifractal_payload(payload)
+                source = MULTIFRACTAL_NOTEBOOK_SOURCES[group]
+                result = execute_notebook_cell(
+                    notebook_path=source["notebook"],
+                    cell_index=int(source["cell_index"]),
+                    output_dir=source["output_dir"],
+                    assignment_overrides=overrides,
+                )
+            else:
+                config_kwargs = parse_lppl_payload(payload)
+                lppl_overrides = {
+                    "tickers": config_kwargs["tickers"],
+                    "START_DATA": config_kwargs["start_data"],
+                    "END_DATA": config_kwargs["end_data"],
+                    "TARGET_DATE": config_kwargs["target_date"],
+                    "window_start_offsets": config_kwargs["window_start_offsets"],
+                    "ROLL_DAYS": config_kwargs["roll_days"],
+                    "ROLL_STEP": config_kwargs["roll_step"],
+                    "plot_duration": config_kwargs["plot_duration"],
+                    "SURROGATE_N": config_kwargs["surrogate_n"],
+                    "OUT_DIR": LPPL_NOTEBOOK_SOURCE["output_dir"].name,
+                }
+                result = execute_notebook_cell(
+                    notebook_path=LPPL_NOTEBOOK_SOURCE["notebook"],
+                    cell_index=int(LPPL_NOTEBOOK_SOURCE["cell_index"]),
+                    output_dir=LPPL_NOTEBOOK_SOURCE["output_dir"],
+                    assignment_overrides=lppl_overrides,
+                )
+
+            self.server.state.reload()
+            response = {
+                "ok": True,
+                "changed_count": result["changed_count"],
+                "changed_files": result["changed_files"],
+                "output_dir": result["output_dir"],
+                "cell_index": result["cell_index"],
+                "manifest": self.server.state.manifest,
+            }
+            body = json.dumps(response).encode("utf-8")
+            self.send_response(HTTPStatus.OK)
+        except Exception as exc:
+            body = json.dumps({"ok": False, "error": str(exc)}).encode("utf-8")
+            self.send_response(HTTPStatus.BAD_REQUEST)
+
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
     def log_message(self, fmt: str, *args: Any) -> None:
         print(f"[dashboard] {self.address_string()} - {fmt % args}")
@@ -970,11 +865,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Serve the StockParticle plot dashboard.")
     parser.add_argument("--host", default="127.0.0.1", help="Host interface to bind. Default: 127.0.0.1")
     parser.add_argument("--port", type=int, default=8000, help="Port to serve on. Default: 8000")
-    parser.add_argument(
-        "--no-browser",
-        action="store_true",
-        help="Do not open the dashboard automatically in the default browser.",
-    )
+    parser.add_argument("--no-browser", action="store_true", help="Do not open the dashboard automatically.")
     return parser.parse_args()
 
 
@@ -993,7 +884,7 @@ def main() -> None:
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        print("\nStopping dashboard server.")
+        print("\\nStopping dashboard server.")
     finally:
         server.server_close()
 
