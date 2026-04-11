@@ -170,7 +170,8 @@ def html_shell() -> str:
       font-size:14px;
       line-height:1.55;
       display:flex;
-      height:100vh;
+      min-height:100dvh;
+      height:100dvh;
       overflow:hidden;
     }
     button,select,input{font:inherit;color:inherit}
@@ -207,7 +208,8 @@ def html_shell() -> str:
     #landing{
       position:fixed;inset:0;z-index:200;
       display:flex;flex-direction:column;align-items:center;justify-content:center;
-      text-align:center;padding:48px 32px;
+      text-align:center;padding:56px 32px 40px;
+      overflow-y:auto;
       background:var(--bg);
       background-image:
         radial-gradient(ellipse 70% 50% at 50% 0%, rgba(79,156,247,0.08), transparent 60%),
