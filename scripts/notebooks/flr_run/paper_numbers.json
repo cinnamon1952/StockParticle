@@ -1,0 +1,89 @@
+{
+ "n_assets": 50,
+ "n_surrogates": 500,
+ "mean_delta_alpha": 0.5480761300239094,
+ "n_sig_shuffle_bh": 36,
+ "n_sig_iaaft_bh": 35,
+ "n_sig_phase_bh": 49,
+ "mean_share_fat_tail_pct": 73.01710330732152,
+ "mean_share_linear_pct": 0.672342619122775,
+ "mean_share_nonlinear_pct": 26.310554073555696,
+ "mean_share_temporal_pct": 26.982896692678466,
+ "half_sample_spearman": 0.08869147659063625,
+ "rolling_rho_raw": -0.11816375378223366,
+ "rolling_p_raw": 0.8810594702648675,
+ "rolling_rho_vol_controlled": 0.11861804427008364,
+ "rolling_p_vol_controlled": 0.8840579710144928,
+ "buildup_slope_per_yr": 0.11457498518204981,
+ "buildup_slope_ci": [
+  0.03036368586647102,
+  0.19878628449762858
+ ],
+ "buildup_slope_placebo_percentile": 87.10280373831776,
+ "corr_snapshots": {
+  "Pre-bubble (Jan 2006)": {
+   "mean_corr": 0.2299,
+   "ci_lo": 0.1461,
+   "ci_hi": 0.3179
+  },
+  "Pre-crash peak (Oct 2007)": {
+   "mean_corr": 0.535,
+   "ci_lo": 0.4374,
+   "ci_hi": 0.6211
+  },
+  "During crash (Oct 2008)": {
+   "mean_corr": 0.5756,
+   "ci_lo": 0.4518,
+   "ci_hi": 0.6752
+  }
+ },
+ "decomposition_aggregate_pct": {
+  "Gaussian/finite-size floor": 42.13,
+  "Extra fat tails": 26.0,
+  "Linear correlation": 2.0,
+  "Nonlinear dependence": 29.87
+ },
+ "decomposition_ci": {
+  "Gaussian/finite-size floor": {
+   "ci_lo": 40.36,
+   "ci_hi": 44.21
+  },
+  "Extra fat tails": {
+   "ci_lo": 22.36,
+   "ci_hi": 30.15
+  },
+  "Linear correlation": {
+   "ci_lo": 0.21,
+   "ci_hi": 3.66
+  },
+  "Nonlinear dependence": {
+   "ci_lo": 25.44,
+   "ci_hi": 33.65
+  }
+ },
+ "ex_covid_rank_rho": 0.39418967587034814,
+ "ex_covid_mean_change": -0.10316022690769096,
+ "window_sensitivity": {
+  "750": {
+   "n_windows": 256,
+   "rho_raw": 0.0939,
+   "p_raw": 0.7496,
+   "rho_vol_controlled": 0.2872,
+   "p_vol_controlled": 0.5537
+  },
+  "1000": {
+   "n_windows": 243,
+   "rho_raw": -0.1182,
+   "p_raw": 0.8746,
+   "rho_vol_controlled": 0.1186,
+   "p_vol_controlled": 0.8916
+  },
+  "1500": {
+   "n_windows": 218,
+   "rho_raw": -0.2772,
+   "p_raw": 0.1499,
+   "rho_vol_controlled": -0.2492,
+   "p_vol_controlled": 0.7646
+  }
+ }
+}

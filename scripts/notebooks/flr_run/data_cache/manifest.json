@@ -1,0 +1,546 @@
+{
+ "AAPL_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:31+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "90cb6197fc74a5172b12f189557e2bad200ba30cb005729703c919ad367ca2c1",
+  "source": "yfinance 0.2.66"
+ },
+ "ABBV_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:43+00:00",
+  "first": "2013-01-02",
+  "last": "2026-04-10",
+  "rows": 3338,
+  "sha256": "c845a24111a5e61548d12466ea4a5d65d5148de97702a316b0a80cb80a0f831f",
+  "source": "yfinance 0.2.66"
+ },
+ "AMD_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:36+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "b6464eb057679b078c7be2380aef74551684adc6129dbeb508a526d4b4fefb47",
+  "source": "yfinance 0.2.66"
+ },
+ "AMZN_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:33+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "ca4c8a6fe632bdc1adb1fb94837693c7f5e7b9e0eda4ba1659d81e7dbd63fdc0",
+  "source": "yfinance 0.2.66"
+ },
+ "AXP_2003-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:56:59+00:00",
+  "first": "2003-01-02",
+  "last": "2026-04-10",
+  "rows": 5855,
+  "sha256": "5e3a2e3fdffe3752366bc15c756adb1e88d164e1c92c1a7b1654178a72368a58",
+  "source": "yfinance 0.2.66"
+ },
+ "AXP_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:40+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "1d7dc22d79af4e5d91d70e5f3e09f9e179ad22314c66367c824682019f2bda38",
+  "source": "yfinance 0.2.66"
+ },
+ "BAC_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:38+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "726b98986790a91a9cb81d32232b4345f07ad8ea9a648e5c1c548b5070f32a28",
+  "source": "yfinance 0.2.66"
+ },
+ "BA_2003-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:56:59+00:00",
+  "first": "2003-01-02",
+  "last": "2026-04-10",
+  "rows": 5855,
+  "sha256": "2a5e7206a6c10fc8c9d4d6bec8761855c9093a74bbebd309167a083375608bdc",
+  "source": "yfinance 0.2.66"
+ },
+ "BA_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:48+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "cece1b8adc80c0073cdf76294607a32ca89461ea4458c2b271df6f462b68d30f",
+  "source": "yfinance 0.2.66"
+ },
+ "BLK_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:40+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "77db3b07e42366dc849a703c8802e8e4053b98c1d061e0115071547fb2ed19d3",
+  "source": "yfinance 0.2.66"
+ },
+ "BTC-USD_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:53+00:00",
+  "first": "2014-09-17",
+  "last": "2026-04-10",
+  "rows": 4224,
+  "sha256": "52a7915f1d44d2e39b4ca76d0d77f83bb5a6e186f6d0957a95480b0f4a4fdd00",
+  "source": "yfinance 0.2.66"
+ },
+ "CAT_2003-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:57:00+00:00",
+  "first": "2003-01-02",
+  "last": "2026-04-10",
+  "rows": 5855,
+  "sha256": "ffbc7206530ce0e8b9ca71509b1dad7fa64fd9e7e691eedb461ab7355d703d15",
+  "source": "yfinance 0.2.66"
+ },
+ "CAT_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:49+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "9548a4335b0d9198e513ee33d53d24ade459cb8b52b861bec00de47c5d2cb0aa",
+  "source": "yfinance 0.2.66"
+ },
+ "CL_F_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:52+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "fd030d46d76b8a5c4a635a3e94ac5d45f4d742a77257421a680225f24edf7f3d",
+  "source": "yfinance 0.2.66"
+ },
+ "COP_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:48+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "b66737fffdaf42e47dd9fb6f154c00558d1219b2ab99387bb6f6912c2adf86b6",
+  "source": "yfinance 0.2.66"
+ },
+ "COST_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:46+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "d8b78648440c31089e427834a4617c05538b8c9664a97a67d16c012cf528b823",
+  "source": "yfinance 0.2.66"
+ },
+ "CVX_2003-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:57:00+00:00",
+  "first": "2003-01-02",
+  "last": "2026-04-10",
+  "rows": 5855,
+  "sha256": "9b97dcd39cfe7374fb79e1916539eadfcde83969a29f89fed00b5d6e2d29c90f",
+  "source": "yfinance 0.2.66"
+ },
+ "CVX_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:47+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "28793dac196712afbd99d3849f007fb95fa020a1ae96cf5fe0ad602adc56062d",
+  "source": "yfinance 0.2.66"
+ },
+ "C_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:40+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "0622ba3c62afb596eccbb651dc7108c5e853c371fe947b2226fa438b6f82acfd",
+  "source": "yfinance 0.2.66"
+ },
+ "ETH-USD_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:53+00:00",
+  "first": "2017-11-09",
+  "last": "2026-04-10",
+  "rows": 3075,
+  "sha256": "a75307d2cb00a4ecd3effd523f484c4f36b08cb016a3d32cbce7968664f7e67b",
+  "source": "yfinance 0.2.66"
+ },
+ "EWG_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:55+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "31bdb7be0827e90b81ea60fba3fe9e444d7b25248b44209938e45565349d9a60",
+  "source": "yfinance 0.2.66"
+ },
+ "EWJ_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:53+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "3478f508e618b319c0ac6d7ad3cff2dae6b91baa0a19c5cdd4ef165d0e81aa24",
+  "source": "yfinance 0.2.66"
+ },
+ "EWU_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:56+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "be528b923535d6363358dc8f9a67bcf94df3cfc01964ce180e30fc7151faf025",
+  "source": "yfinance 0.2.66"
+ },
+ "EWZ_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:54+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "f64912de58efa1d7d982b048fb81883a6d77f99d731f36578007d1f58c53cce8",
+  "source": "yfinance 0.2.66"
+ },
+ "FXI_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:54+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "c54040d05f2f5ccf87504fca2c734297a929ab9e4bae715c6209a5ae622c462e",
+  "source": "yfinance 0.2.66"
+ },
+ "GC_F_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:52+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "12934002c12113f8ac390e23ce50eaae09c7ac1c2318b91d622ed56cafcbe682",
+  "source": "yfinance 0.2.66"
+ },
+ "GE_2003-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:57:02+00:00",
+  "first": "2003-01-02",
+  "last": "2026-04-10",
+  "rows": 5855,
+  "sha256": "5d577147a67d6a25f7e984214f9b49d6f96092cff8a8b0a622ed1f6deac0d22b",
+  "source": "yfinance 0.2.66"
+ },
+ "GE_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:49+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "8b37a70dd64ded7179ddba6e3d6653934aaba94ffca5369c243a4204891126d6",
+  "source": "yfinance 0.2.66"
+ },
+ "GOOG_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:32+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "5df63fa7e7821b9ed0365f30ec82e967ca9e2afdfa7ffb2b4388fe52c8e37206",
+  "source": "yfinance 0.2.66"
+ },
+ "GS_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:38+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "b26cad028844046579cd0bafa4674588f044003382a77415eab632276d7d8d5d",
+  "source": "yfinance 0.2.66"
+ },
+ "HON_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:50+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "322e663cb1dee9be7ac047e66e0e2a02a71929fd937338979bc8be4af29f6b0d",
+  "source": "yfinance 0.2.66"
+ },
+ "IBM_2003-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:57:03+00:00",
+  "first": "2003-01-02",
+  "last": "2026-04-10",
+  "rows": 5855,
+  "sha256": "fea0e6fb294ca1f83e99cdeddb14c0f793c038fae7a75d8d6fb5164f9a06c533",
+  "source": "yfinance 0.2.66"
+ },
+ "IDX_DJI_1990-01-01_2024-01-01.csv": {
+  "downloaded_utc": "2026-10-16T22:57:14+00:00",
+  "first": "1992-01-02",
+  "last": "2023-12-29",
+  "rows": 8059,
+  "sha256": "724129bcc7250486ecbc4667956b2ae0e0fc184931afaf61082781c84509f82d",
+  "source": "yfinance 0.2.66"
+ },
+ "IDX_GSPC_2003-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:57:06+00:00",
+  "first": "2003-01-02",
+  "last": "2026-04-10",
+  "rows": 5855,
+  "sha256": "02a36f7433f630d6c43a3787cfb65016c779f1270d751a988fe7f4e3273290e3",
+  "source": "yfinance 0.2.66"
+ },
+ "IDX_IXIC_1990-01-01_2024-01-01.csv": {
+  "downloaded_utc": "2026-10-16T22:57:15+00:00",
+  "first": "1990-01-02",
+  "last": "2023-12-29",
+  "rows": 8565,
+  "sha256": "7853ea4d4d2aa50e705096d41b7233956eeed943f98741c597c708500b5ef491",
+  "source": "yfinance 0.2.66"
+ },
+ "INTC_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:37+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "293f7fd16ba90da9b5480ec1a239171df5d7c0d9fcadd9b5612acea9f16bcf1a",
+  "source": "yfinance 0.2.66"
+ },
+ "JNJ_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:41+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "bd941f0496deb54a1751ac48960f0bfb81f80a3ed52030fb9c5b737aa0a78cde",
+  "source": "yfinance 0.2.66"
+ },
+ "JPM_2003-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:57:05+00:00",
+  "first": "2003-01-02",
+  "last": "2026-04-10",
+  "rows": 5855,
+  "sha256": "5b94f58bcedd34ca46d4bf67f496524297280791726ab14f896ae9f963402ffe",
+  "source": "yfinance 0.2.66"
+ },
+ "JPM_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:37+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "70010580ad77e6218748c5e9d7c2bf139aa581312ad92cb56fe1f6f08eb2ade0",
+  "source": "yfinance 0.2.66"
+ },
+ "KO_2003-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:57:01+00:00",
+  "first": "2003-01-02",
+  "last": "2026-04-10",
+  "rows": 5855,
+  "sha256": "6175ef805650766c06ae4aaf67f1b96aa724e826dbac3e1c42ec16e2cfe9e979",
+  "source": "yfinance 0.2.66"
+ },
+ "KO_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:45+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "61e305b0bdef59d00b65822b9fc980d89b0a9e42e65d917e0a1681ec743dd532",
+  "source": "yfinance 0.2.66"
+ },
+ "LMT_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:50+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "daaa7f7efb562e0edf5d5eb4e914097ef552c78b3ca2f739c0cda8b4b204f6ac",
+  "source": "yfinance 0.2.66"
+ },
+ "MA_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:41+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "fa22954b385084b653853e5563208b7fc6cacc0eb1beeaf1d7213d8695c2a824",
+  "source": "yfinance 0.2.66"
+ },
+ "MCD_2003-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:57:03+00:00",
+  "first": "2003-01-02",
+  "last": "2026-04-10",
+  "rows": 5855,
+  "sha256": "718b1f72d502406b45a73487375ce15d82c17be8fdd56f07d84d06b92aafdf68",
+  "source": "yfinance 0.2.66"
+ },
+ "META_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:34+00:00",
+  "first": "2012-05-18",
+  "last": "2026-04-10",
+  "rows": 3493,
+  "sha256": "c80ccd99574d43f043977b4440c72c1728b777d2c66b1779f814c52c1f57979a",
+  "source": "yfinance 0.2.66"
+ },
+ "MMM_2003-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:56:58+00:00",
+  "first": "2003-01-02",
+  "last": "2026-04-10",
+  "rows": 5855,
+  "sha256": "372e27277d8f7f46f67bd00adcff82a4a6c1d672d8869e7f54c6c702df2b2eec",
+  "source": "yfinance 0.2.66"
+ },
+ "MRK_2003-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:57:04+00:00",
+  "first": "2003-01-02",
+  "last": "2026-04-10",
+  "rows": 5855,
+  "sha256": "762546dcaa5afcf0c5d62f06c1676368b6abef31f4b725185e549dc645a6c221",
+  "source": "yfinance 0.2.66"
+ },
+ "MRK_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:43+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "0a6a4f478de555ef0642a58d224d08eb0611a5b642c62db0a619637d7a488056",
+  "source": "yfinance 0.2.66"
+ },
+ "MSFT_2003-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:57:06+00:00",
+  "first": "2003-01-02",
+  "last": "2026-04-10",
+  "rows": 5855,
+  "sha256": "0148ec90bf2df4eff2fdda5ed62a89509f3eea45e65cdff3d0f4f2c9be259fae",
+  "source": "yfinance 0.2.66"
+ },
+ "MSFT_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:32+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "29442d87005975fd23d043d057a936013e14f8c1008899007dfa2f2d3641c636",
+  "source": "yfinance 0.2.66"
+ },
+ "MS_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:39+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "b758256eff5af99d6b6faf1cdf641544d77435916d446ffa0ec6d3c3d9f69280",
+  "source": "yfinance 0.2.66"
+ },
+ "NFLX_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:35+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "05edbab9210a43933948b84b7dae8b2b6a64f31136a57fe9eec85d1e883bbb84",
+  "source": "yfinance 0.2.66"
+ },
+ "NVDA_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:33+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "2028893691c563f79e24683c017a4215284bfecf5b1007d855831231b8a1a294",
+  "source": "yfinance 0.2.66"
+ },
+ "PEP_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:45+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "b3a628e3ead2495d3675bbf703a0ad3a4c0802c0016d6b3134a477919c6a404d",
+  "source": "yfinance 0.2.66"
+ },
+ "PFE_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:42+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "148b111dc59b41b390541a67bf3fa89661fe0c1d47d8592a0218737e4604f02d",
+  "source": "yfinance 0.2.66"
+ },
+ "PG_2003-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:57:04+00:00",
+  "first": "2003-01-02",
+  "last": "2026-04-10",
+  "rows": 5855,
+  "sha256": "7b9971f365fc374a710a7f7e1e4b3b26f119f0d9c5ce7607bfd60f4aea30eb58",
+  "source": "yfinance 0.2.66"
+ },
+ "PG_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:44+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "a4418dbada95c19a663cccf4518ca8e5867a25ef829dca21bb3ea3f3ed6bd5d3",
+  "source": "yfinance 0.2.66"
+ },
+ "RTX_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:51+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "e8815b1a422dcf9d5f1b84377d2ff1c6d70993687016b105ffdbef4eec6778be",
+  "source": "yfinance 0.2.66"
+ },
+ "SI_F_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:52+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4091,
+  "sha256": "648a9c2f2ebdb13e969396478faf3fc73842b9422ebf5a3f621c914f109db8c2",
+  "source": "yfinance 0.2.66"
+ },
+ "TSLA_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:34+00:00",
+  "first": "2010-06-29",
+  "last": "2026-04-10",
+  "rows": 3970,
+  "sha256": "e5ee9a6dfb16e7c8f7455fc1f736afb46d97d8ada4cdd189f67c8fc96d1de361",
+  "source": "yfinance 0.2.66"
+ },
+ "UNH_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:42+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "64e1033f6960d03299f6cdcea0f4b0b4d1aeaccf4447da6ffe55e93d3b18af7c",
+  "source": "yfinance 0.2.66"
+ },
+ "UPS_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:51+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "b172df78c46962ad1d17735a47e6942c1e14032747579ae04ca39c495bb19f7b",
+  "source": "yfinance 0.2.66"
+ },
+ "V_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:41+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "621ae39d2d9a9d32edffad9f857a7845b7a77f5a21e9a6183f3dce8de1e6cfdf",
+  "source": "yfinance 0.2.66"
+ },
+ "WFC_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:39+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "3b968592aa6d2331f10f195540bbb3d7c2bb812062fbe1011bf765af43d34d77",
+  "source": "yfinance 0.2.66"
+ },
+ "WMT_2003-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:57:05+00:00",
+  "first": "2003-01-02",
+  "last": "2026-04-10",
+  "rows": 5855,
+  "sha256": "a4e4c2de44e499c8a34770eb71c98e8fac26ed8baff384914a19a6ed58c2c9f7",
+  "source": "yfinance 0.2.66"
+ },
+ "WMT_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:46+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "c03f527c714e8bba0f749963a627a22877c5d2a901315e15021e1616822bc651",
+  "source": "yfinance 0.2.66"
+ },
+ "XOM_2003-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:57:02+00:00",
+  "first": "2003-01-02",
+  "last": "2026-04-10",
+  "rows": 5855,
+  "sha256": "abac78558ddd23282beb0218652fe3b9566be458203fc18967272c6399778dd3",
+  "source": "yfinance 0.2.66"
+ },
+ "XOM_2010-01-01_2026-04-11.csv": {
+  "downloaded_utc": "2026-10-16T22:43:47+00:00",
+  "first": "2010-01-04",
+  "last": "2026-04-10",
+  "rows": 4092,
+  "sha256": "a5b3c401124afc3a605d0d0f4073708f9266365836d9337103232229ae632ef7",
+  "source": "yfinance 0.2.66"
+ }
+}
