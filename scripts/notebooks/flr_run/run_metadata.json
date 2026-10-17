@@ -1,5 +1,5 @@
 {
- "run_utc": "2026-10-16T22:57:15+00:00",
+ "run_utc": "2026-10-17T07:53:13+00:00",
  "config": {
   "SEED": 42,
   "DATA_MODE": "yfinance",
@@ -71,12 +71,12 @@
   "ipykernel": "6.31.0"
  },
  "timings_s": {
-  "data download/load": 25.0,
-  "surrogate decomposition": 753.4,
-  "robustness grid": 20.6,
-  "load episode data": 8.8,
-  "rolling MF-DFA": 5.5,
-  "scaling law": 1.1
+  "data download/load": 0.2,
+  "surrogate decomposition": 517.0,
+  "robustness grid": 8.9,
+  "load episode data": 0.1,
+  "rolling MF-DFA": 2.4,
+  "scaling law": 0.0
  },
  "data_manifest_sha256": "f171e0d9b17267a83bfce414f8ec470a3631c896208bd56c5b7e8864d4a465d6",
  "n_cached_files": 68
