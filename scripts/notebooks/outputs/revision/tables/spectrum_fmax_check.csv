@@ -1,0 +1,151 @@
+ticker,method,tau_at_q0,f_at_q0,f_max,q_at_f_max
+AAPL,SG step 5 (as in paper),-1.0,1.0157122906664982,1.0157122906664982,0.0
+AAPL,direct step 5,-1.0,1.0,1.0,0.0
+AAPL,direct step 1,-1.0,1.0,1.0,0.0
+MSFT,SG step 5 (as in paper),-1.0,1.005831567209046,1.005831567209046,0.0
+MSFT,direct step 5,-1.0,1.0,1.0,0.0
+MSFT,direct step 1,-1.0,1.0,1.0,0.0
+GOOG,SG step 5 (as in paper),-1.0,1.0217056082066014,1.0217056082066014,0.0
+GOOG,direct step 5,-1.0,1.0,1.0,0.0
+GOOG,direct step 1,-1.0,1.0,1.0,0.0
+AMZN,SG step 5 (as in paper),-1.0,1.0528341467030382,1.0528341467030382,0.0
+AMZN,direct step 5,-1.0,1.0,1.0,0.0
+AMZN,direct step 1,-1.0,1.0,1.0,0.0
+NVDA,SG step 5 (as in paper),-1.0,0.9251781815858104,0.9251781815858104,0.0
+NVDA,direct step 5,-1.0,1.0,1.0,0.0
+NVDA,direct step 1,-1.0,1.0,1.1032778337241727,-4.0
+META,SG step 5 (as in paper),-1.0,0.9417427847137806,0.9417427847137806,0.0
+META,direct step 5,-1.0,1.0,1.0,0.0
+META,direct step 1,-1.0,1.0,1.0010693818417389,1.0
+TSLA,SG step 5 (as in paper),-1.0,0.9619315493126093,0.9619315493126093,0.0
+TSLA,direct step 5,-1.0,1.0,1.0,0.0
+TSLA,direct step 1,-1.0,1.0,1.0,0.0
+NFLX,SG step 5 (as in paper),-1.0,0.9793352366210097,0.9793352366210097,0.0
+NFLX,direct step 5,-1.0,1.0,1.0,0.0
+NFLX,direct step 1,-1.0,1.0,1.0,0.0
+AMD,SG step 5 (as in paper),-1.0,1.0409666469146315,1.0409666469146315,0.0
+AMD,direct step 5,-1.0,1.0,1.0,0.0
+AMD,direct step 1,-1.0,1.0,1.0,0.0
+INTC,SG step 5 (as in paper),-1.0,1.0867332204819808,1.0867332204819808,0.0
+INTC,direct step 5,-1.0,1.0,1.0,0.0
+INTC,direct step 1,-1.0,1.0,1.0,0.0
+JPM,SG step 5 (as in paper),-1.0,1.0011166008539436,1.0011166008539436,0.0
+JPM,direct step 5,-1.0,1.0,1.0,0.0
+JPM,direct step 1,-1.0,1.0,1.0,0.0
+BAC,SG step 5 (as in paper),-1.0,1.0182015038523478,1.0182015038523478,0.0
+BAC,direct step 5,-1.0,1.0,1.0,0.0
+BAC,direct step 1,-1.0,1.0,1.0,0.0
+GS,SG step 5 (as in paper),-1.0,0.9968031948407274,0.9968031948407274,0.0
+GS,direct step 5,-1.0,1.0,1.0,0.0
+GS,direct step 1,-1.0,1.0,1.0,0.0
+MS,SG step 5 (as in paper),-1.0,1.0088915830642537,1.0088915830642537,0.0
+MS,direct step 5,-1.0,1.0,1.0,0.0
+MS,direct step 1,-1.0,1.0,1.0,0.0
+WFC,SG step 5 (as in paper),-1.0,0.9416940251802818,0.9416940251802818,0.0
+WFC,direct step 5,-1.0,1.0,1.0,0.0
+WFC,direct step 1,-1.0,1.0,1.0043286650613092,1.0
+BLK,SG step 5 (as in paper),-1.0,1.03953766960976,1.03953766960976,0.0
+BLK,direct step 5,-1.0,1.0,1.0,0.0
+BLK,direct step 1,-1.0,1.0,1.0,0.0
+C,SG step 5 (as in paper),-1.0,1.0254821416086473,1.0254821416086473,0.0
+C,direct step 5,-1.0,1.0,1.0,0.0
+C,direct step 1,-1.0,1.0,1.0,0.0
+AXP,SG step 5 (as in paper),-1.0,1.0557425953088553,1.0557425953088553,0.0
+AXP,direct step 5,-1.0,1.0,1.0,0.0
+AXP,direct step 1,-1.0,1.0,1.0,0.0
+V,SG step 5 (as in paper),-1.0,1.0958351883394384,1.0958351883394384,0.0
+V,direct step 5,-1.0,1.0,1.0,0.0
+V,direct step 1,-1.0,1.0,1.0,0.0
+MA,SG step 5 (as in paper),-1.0,1.0865859596320486,1.0865859596320486,0.0
+MA,direct step 5,-1.0,1.0,1.0,0.0
+MA,direct step 1,-1.0,1.0,1.0,0.0
+JNJ,SG step 5 (as in paper),-1.0,1.0928779855859203,1.0928779855859203,0.0
+JNJ,direct step 5,-1.0,1.0,1.0,0.0
+JNJ,direct step 1,-1.0,1.0,1.0,0.0
+PFE,SG step 5 (as in paper),-1.0,1.0503494227621444,1.0503494227621444,0.0
+PFE,direct step 5,-1.0,1.0,1.0,0.0
+PFE,direct step 1,-1.0,1.0,1.0,0.0
+UNH,SG step 5 (as in paper),-1.0,1.0781354388720323,1.0781354388720323,0.0
+UNH,direct step 5,-1.0,1.0,1.0,0.0
+UNH,direct step 1,-1.0,1.0,1.0,0.0
+MRK,SG step 5 (as in paper),-1.0,1.0591679435545345,1.0591679435545345,0.0
+MRK,direct step 5,-1.0,1.0,1.0,0.0
+MRK,direct step 1,-1.0,1.0,1.0,0.0
+ABBV,SG step 5 (as in paper),-1.0,1.093514674131526,1.093514674131526,0.0
+ABBV,direct step 5,-1.0,1.0,1.0,0.0
+ABBV,direct step 1,-1.0,1.0,1.0,0.0
+PG,SG step 5 (as in paper),-1.0,1.0275333827657793,1.0275333827657793,0.0
+PG,direct step 5,-1.0,1.0,1.0,0.0
+PG,direct step 1,-1.0,1.0,1.0,0.0
+KO,SG step 5 (as in paper),-1.0,1.106981270676441,1.106981270676441,0.0
+KO,direct step 5,-1.0,1.0,1.0,0.0
+KO,direct step 1,-1.0,1.0,1.0,0.0
+PEP,SG step 5 (as in paper),-1.0,1.068230666285033,1.068230666285033,0.0
+PEP,direct step 5,-1.0,1.0,1.0,0.0
+PEP,direct step 1,-1.0,1.0,1.0,0.0
+WMT,SG step 5 (as in paper),-1.0,1.0865996283698478,1.0865996283698478,0.0
+WMT,direct step 5,-1.0,1.0,1.0,0.0
+WMT,direct step 1,-1.0,1.0,1.0,0.0
+COST,SG step 5 (as in paper),-1.0,1.0463633266573535,1.0463633266573535,0.0
+COST,direct step 5,-1.0,1.0,1.0,0.0
+COST,direct step 1,-1.0,1.0,1.0,0.0
+XOM,SG step 5 (as in paper),-1.0,0.9658200825045464,0.9658200825045464,0.0
+XOM,direct step 5,-1.0,1.0,1.0,0.0
+XOM,direct step 1,-1.0,1.0,1.0,0.0
+CVX,SG step 5 (as in paper),-1.0,1.0932666998586549,1.0932666998586549,0.0
+CVX,direct step 5,-1.0,1.0,1.0,0.0
+CVX,direct step 1,-1.0,1.0,1.0,0.0
+COP,SG step 5 (as in paper),-1.0,1.0807035435475227,1.0807035435475227,0.0
+COP,direct step 5,-1.0,1.0,1.0,0.0
+COP,direct step 1,-1.0,1.0,1.0,0.0
+BA,SG step 5 (as in paper),-1.0,1.1452848355538796,1.1452848355538796,0.0
+BA,direct step 5,-1.0,1.0,1.0,0.0
+BA,direct step 1,-1.0,1.0,1.0,0.0
+CAT,SG step 5 (as in paper),-1.0,1.0453440450249767,1.0453440450249767,0.0
+CAT,direct step 5,-1.0,1.0,1.0,0.0
+CAT,direct step 1,-1.0,1.0,1.0,0.0
+GE,SG step 5 (as in paper),-1.0,0.9404158935728055,0.9404158935728055,0.0
+GE,direct step 5,-1.0,1.0,1.0,0.0
+GE,direct step 1,-1.0,1.0,1.0012561468465795,-1.0
+HON,SG step 5 (as in paper),-1.0,1.0177383394019515,1.0177383394019515,0.0
+HON,direct step 5,-1.0,1.0,1.0,0.0
+HON,direct step 1,-1.0,1.0,1.0,0.0
+LMT,SG step 5 (as in paper),-1.0,1.0601041514593337,1.0601041514593337,0.0
+LMT,direct step 5,-1.0,1.0,1.0,0.0
+LMT,direct step 1,-1.0,1.0,1.0,0.0
+RTX,SG step 5 (as in paper),-1.0,1.0888878029158398,1.0888878029158398,0.0
+RTX,direct step 5,-1.0,1.0,1.0,0.0
+RTX,direct step 1,-1.0,1.0,1.0,0.0
+UPS,SG step 5 (as in paper),-1.0,1.049483637875942,1.049483637875942,0.0
+UPS,direct step 5,-1.0,1.0,1.0,0.0
+UPS,direct step 1,-1.0,1.0,1.0,0.0
+GC=F,SG step 5 (as in paper),-1.0,1.0651740715504738,1.0651740715504738,0.0
+GC=F,direct step 5,-1.0,1.0,1.0,0.0
+GC=F,direct step 1,-1.0,1.0,1.0,0.0
+SI=F,SG step 5 (as in paper),-1.0,1.0849118744100263,1.0849118744100263,0.0
+SI=F,direct step 5,-1.0,1.0,1.0,0.0
+SI=F,direct step 1,-1.0,1.0,1.0,0.0
+CL=F,SG step 5 (as in paper),-1.0,1.0838807522137384,1.0838807522137384,0.0
+CL=F,direct step 5,-1.0,1.0,1.0,0.0
+CL=F,direct step 1,-1.0,1.0,1.0,0.0
+BTC-USD,SG step 5 (as in paper),-1.0,1.0729414423785268,1.0729414423785268,0.0
+BTC-USD,direct step 5,-1.0,1.0,1.0,0.0
+BTC-USD,direct step 1,-1.0,1.0,1.0,0.0
+ETH-USD,SG step 5 (as in paper),-1.0,1.071527683481559,1.071527683481559,0.0
+ETH-USD,direct step 5,-1.0,1.0,1.0,0.0
+ETH-USD,direct step 1,-1.0,1.0,1.0,0.0
+EWJ,SG step 5 (as in paper),-1.0,1.044409388673049,1.044409388673049,0.0
+EWJ,direct step 5,-1.0,1.0,1.0,0.0
+EWJ,direct step 1,-1.0,1.0,1.0,0.0
+EWZ,SG step 5 (as in paper),-1.0,0.9892188907590691,0.9892188907590691,0.0
+EWZ,direct step 5,-1.0,1.0,1.0,0.0
+EWZ,direct step 1,-1.0,1.0,1.0,0.0
+FXI,SG step 5 (as in paper),-1.0,1.0431619094385054,1.0431619094385054,0.0
+FXI,direct step 5,-1.0,1.0,1.0,0.0
+FXI,direct step 1,-1.0,1.0,1.0,0.0
+EWG,SG step 5 (as in paper),-1.0,1.0757259463020847,1.0757259463020847,0.0
+EWG,direct step 5,-1.0,1.0,1.0,0.0
+EWG,direct step 1,-1.0,1.0,1.0,0.0
+EWU,SG step 5 (as in paper),-1.0,1.0934314309379685,1.0934314309379685,0.0
+EWU,direct step 5,-1.0,1.0,1.0,0.0
+EWU,direct step 1,-1.0,1.0,1.0,0.0

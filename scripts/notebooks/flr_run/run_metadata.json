@@ -1,5 +1,5 @@
 {
- "run_utc": "2026-10-17T07:53:13+00:00",
+ "run_utc": "2026-10-21T06:43:41+00:00",
  "config": {
   "SEED": 42,
   "DATA_MODE": "yfinance",
@@ -58,26 +58,30 @@
  },
  "config_hash": "0aaa4807ab",
  "data_mode": "yfinance",
- "python": "3.9.19",
- "platform": "macOS-27.0.1-arm64-arm-64bit",
+ "python": "3.10.10",
+ "platform": "Windows-10-10.0.26200-SP0",
  "packages": {
-  "numpy": "1.26.4",
+  "numpy": "2.2.6",
   "scipy": "1.13.1",
-  "pandas": "2.2.3",
-  "matplotlib": "3.8.4",
-  "statsmodels": "0.14.1",
-  "joblib": "1.5.3",
+  "pandas": "2.3.0",
+  "matplotlib": "3.10.0",
+  "statsmodels": "0.14.5",
+  "joblib": "1.4.2",
   "yfinance": "0.2.66",
-  "ipykernel": "6.31.0"
+  "ipykernel": "7.3.0"
  },
  "timings_s": {
-  "data download/load": 0.2,
-  "surrogate decomposition": 517.0,
-  "robustness grid": 8.9,
-  "load episode data": 0.1,
-  "rolling MF-DFA": 2.4,
-  "scaling law": 0.0
+  "data download/load": 0.3,
+  "surrogate decomposition": 271.8,
+  "robustness grid": 7.4,
+  "load episode data": 0.4,
+  "rolling MF-DFA": 1.1,
+  "scaling law": 0.1
  },
- "data_manifest_sha256": "f171e0d9b17267a83bfce414f8ec470a3631c896208bd56c5b7e8864d4a465d6",
- "n_cached_files": 68
+ "data_manifest_sha256": "548bf7e5c7d4e224fccc49cb175f4e8b557440d4ca586db19164167110d6f739",
+ "n_cached_files": 118,
+ "code_sha256": {
+  "flr_core.py": "2578eed5c6c5337fb0ddf172da451548b84238121c4451f114bb2490b15aba53",
+  "figstyle.py": "65df7e844ec6966ca402717aa1bd64969bbe34f1406ad8aa07f957dbd85d86ca"
+ }
 }

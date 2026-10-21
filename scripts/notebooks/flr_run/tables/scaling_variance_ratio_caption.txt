@@ -1,0 +1,1 @@
+Sample: DJIA 1992-01-03 to 2023-12-29; Nasdaq 1990-01-03 to 2023-12-29 (daily log returns; download end date 2024-01-01 is exclusive). Lo-MacKinlay VR(k) with heteroskedasticity-robust z*. p_BH and p_Holm adjust across all six tests.

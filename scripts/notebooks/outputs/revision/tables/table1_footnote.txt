@@ -1,0 +1,1 @@
+Changes are point estimates from unrounded snapshot means (+0.305, +0.041); the bootstrap means of the differences are +0.308 and +0.037; brackets are percentile 95% intervals of the bootstrap differences (circular block bootstrap, block = 5, B = 1000).

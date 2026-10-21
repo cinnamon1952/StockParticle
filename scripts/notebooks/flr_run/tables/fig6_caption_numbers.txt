@@ -1,0 +1,1 @@
+Spearman rho between rolling width (1000 d window) and the 60 d mean pairwise correlation: raw -0.12 (circular-shift p = 0.87); volatility-controlled +0.12 (p = 0.89); 243 overlapping windows. Shaded bands: 2008-09 GFC (2007-10-09 to 2009-03-09); 2020 COVID (2020-02-19 to 2020-03-23); 2022 bear market (2022-01-03 to 2022-10-12).

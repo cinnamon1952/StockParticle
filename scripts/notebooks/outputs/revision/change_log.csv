@@ -1,0 +1,19 @@
+item,quantity,old,new,changed
+10,COVID-length block (×6): change in Δα (random position) [old L=133 calendar -> new L=93 trading],0.178,0.21450195950223885,True
+10,"COVID-only (fixed late position, ×6) [old L=132 -> new L=93]",0.189,0.21729253422045366,True
+10,GFC-only (×3) [old L=302 -> new L=209],0.059,0.07707537514707852,True
+1,"i.i.d. Student-t(4) mean width, N=4600",0.352,0.3480389030155181,True
+1,"i.i.d. Gaussian mean width, N=4091 (new)",,0.21840111100429152,True
+1,"i.i.d. Gaussian mean width, N=4600 (new)",,0.21803602545572046,True
+2,canonical shares full sample: PR / SH-PR / IA-SH / obs-IA (%),42.1 / 26.0 / 2.0 / 29.9,42.1 / 26.0 / 2.0 / 29.9,True
+3,"COVID-deletion change, commodities (as implemented)",-0.087,-0.08726909534745571,False
+3,"COVID-deletion change, commodities (exclude CL=F)",,0.0024099523045236215,True
+7c,"mean width, q step 1 with SG (window 5, order 2)",0.548,0.5426799657436471,True
+7c,"mean width, q step 1 direct Legendre (no smoothing)",,0.5425758424010573,True
+7c,"Spearman vs baseline, step 1 direct",,0.99875150060024,True
+9,half-sample Spearman rho (same max scale in both halves),0.09,0.08869147659063625,True
+9,"expected half-sample rho from noise alone (shuffled series, mean)",,0.07811956782713086,True
+12,"n independent windows (non-overlapping), 1000 d",,5.0,True
+15,Table 1 delta 2006->2007 (bootstrap mean -> point estimate),0.308,0.30511468234849354,True
+15,Table 1 delta 2007->2008 (bootstrap mean -> point estimate),0.037,0.04051344458619066,True
+16,PR share of aggregate width (%),42.1,42.134199165687185,True

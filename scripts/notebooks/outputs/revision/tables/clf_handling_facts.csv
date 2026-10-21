@@ -1,0 +1,11 @@
+,value
+n_returns_as_implemented,4090
+n_nonpositive_prices,1
+negative_price_date,2020-04-20
+negative_price,-37.630001068115234
+spanning_return_from,2020-04-17
+spanning_return_to,2020-04-21
+spanning_return_value,-0.6016757792529508
+calendar_days_spanned,4
+undefined_returns_if_logs_first,2 (into and out of the negative price)
+n_returns_if_both_dropped,4089

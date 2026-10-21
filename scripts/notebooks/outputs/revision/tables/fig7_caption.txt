@@ -1,0 +1,1 @@
+Error bars: 95% CI = ±1.96 × SE of the paired change in Δα over 100 replications (SE = SD of the paired difference / sqrt(100)). Dotted lines: trading days in the real windows (93 for 2020-02-19 to 2020-06-30, 209 for 2008-09-01 to 2009-06-30). Baseline: iid Student-t(4), N = 4600, mean Δα = 0.352.

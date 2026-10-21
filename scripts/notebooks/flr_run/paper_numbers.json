@@ -1,23 +1,23 @@
 {
  "n_assets": 50,
  "n_surrogates": 500,
- "mean_delta_alpha": 0.5480761300239094,
+ "mean_delta_alpha": 0.5480762642548763,
  "n_sig_shuffle_bh": 36,
- "n_sig_iaaft_bh": 35,
+ "n_sig_iaaft_bh": 34,
  "n_sig_phase_bh": 49,
- "mean_share_fat_tail_pct": 73.01710330732152,
- "mean_share_linear_pct": 0.672342619122775,
- "mean_share_nonlinear_pct": 26.310554073555696,
- "mean_share_temporal_pct": 26.982896692678466,
+ "mean_share_fat_tail_pct": 73.01701946872404,
+ "mean_share_linear_pct": 0.6676362628605594,
+ "mean_share_nonlinear_pct": 26.315344268415398,
+ "mean_share_temporal_pct": 26.982980531275956,
  "half_sample_spearman": 0.08869147659063625,
  "rolling_rho_raw": -0.11816375378223366,
  "rolling_p_raw": 0.8810594702648675,
  "rolling_rho_vol_controlled": 0.11861804427008364,
  "rolling_p_vol_controlled": 0.8840579710144928,
- "buildup_slope_per_yr": 0.11457498518204981,
+ "buildup_slope_per_yr": 0.11457386583079848,
  "buildup_slope_ci": [
-  0.03036368586647102,
-  0.19878628449762858
+  0.03036294479390257,
+  0.1987847868676944
  ],
  "buildup_slope_placebo_percentile": 87.10280373831776,
  "corr_snapshots": {
@@ -40,7 +40,7 @@
  "decomposition_aggregate_pct": {
   "Gaussian/finite-size floor": 42.13,
   "Extra fat tails": 26.0,
-  "Linear correlation": 2.0,
+  "Linear correlation": 1.99,
   "Nonlinear dependence": 29.87
  },
  "decomposition_ci": {
@@ -57,12 +57,12 @@
    "ci_hi": 3.66
   },
   "Nonlinear dependence": {
-   "ci_lo": 25.44,
+   "ci_lo": 25.45,
    "ci_hi": 33.65
   }
  },
  "ex_covid_rank_rho": 0.39418967587034814,
- "ex_covid_mean_change": -0.10316022690769096,
+ "ex_covid_mean_change": -0.10316025547279072,
  "window_sensitivity": {
   "750": {
    "n_windows": 256,

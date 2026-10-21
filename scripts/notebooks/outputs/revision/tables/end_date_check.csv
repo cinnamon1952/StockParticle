@@ -1,0 +1,9 @@
+,value
+config_END_A,2026-04-11
+END_A_weekday,Saturday
+yfinance_end_is,exclusive
+last_return_equities,2026-04-10
+last_return_crypto,2026-04-10
+manifest_last_AAPL,2026-04-10
+config_END_C,2024-01-01
+last_obs_scaling_series,2023-12-29

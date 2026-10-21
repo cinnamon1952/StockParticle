@@ -1,0 +1,1 @@
+Single-asset MF-DFA for GC=F: (a) log returns, (b) fluctuation functions, (c) h(q), (d) tau(q), (e) alpha(q) (shaded: region where alpha is flat, defined from the data as |d alpha/dq| below 10% of its maximum), (f) f(alpha). Width = 0.5291.

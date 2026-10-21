@@ -1,0 +1,9 @@
+,value
+observed_rho_original,0.08869147659063625
+observed_rho_same_max_scale,0.08869147659063625
+noise_rho_mean,0.07811956782713086
+noise_rho_p05,-0.16676110444177672
+noise_rho_p95,0.3059783913565425
+noise_rho_SB_mean,0.14491818933325734
+share_of_noise_draws_below_observed,0.5
+n_shuffles,50.0
