@@ -183,7 +183,7 @@ Using the negative-$q$ singularity spectrum ($\alpha$ for $q < 0$), we decompose
 
 \begin{table}[H]
 \centering
-\caption{Expected tail-risk contribution ranking}
+\caption{Tail-risk contribution ranking (\textit{proposed; not yet computed from data})}
 \begin{tabular}{llp{7cm}}
 \toprule
 \textbf{Asset} & \textbf{CTR Rank} & \textbf{Rationale} \\
@@ -195,6 +195,10 @@ EWJ     & Lowest  & Narrowest spectrum (0.185) \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\begin{warningbox}
+\textbf{Status: Proposed, not computed.} The CTR values in this table are analytical predictions derived from the baseline $\Delta h$ figures in Table~\ref{tab:baseline}, not from a numerically integrated negative-$q$ spectrum. The rank ordering should be validated computationally before use.
+\end{warningbox}
 
 \begin{warningbox}
 JNJ and XOM are traditionally considered ``defensive'' assets. Their high CTR reveals that from a \textbf{multifractal tail-risk perspective}, they are actually among the most dangerous portfolio components. This is invisible to standard mean-variance analysis.
@@ -230,11 +234,13 @@ The heat-map of $(h_i(q) - h_{\text{portfolio}}(q)) \times w_i$ across all $q$ p
 \item \textbf{Blue cells} = asset decreases it
 \end{itemize}
 
-\textbf{Expected patterns:}
+\textbf{Proposed patterns (not yet computed):}
 \begin{itemize}[nosep]
-\item BTC-USD shows strong red at low $q$ (amplifies persistence of small moves)
-\item GC=F and EWJ show blue (dampen multifractality---genuine diversifiers at the fractal level)
+\item BTC-USD expected to show strong red at low $q$ (amplifies persistence of small moves)
+\item GC=F and EWJ expected to show blue (dampen multifractality---genuine diversifiers at the fractal level)
 \end{itemize}
+
+\textit{\textbf{Note:} The heat-map itself has not been generated. These are analytical predictions consistent with the baseline MF-DFA results in Table~\ref{tab:baseline}.}
 
 % ══════════════════════════════════════════════════════════════════
 \section{Sector-Level Multifractality}
@@ -244,7 +250,7 @@ The heat-map of $(h_i(q) - h_{\text{portfolio}}(q)) \times w_i$ across all $q$ p
 
 \begin{table}[H]
 \centering
-\caption{Sector-level persistence regimes}
+\caption{Sector-level persistence regimes (\textit{proposed; sector averages not yet computed from the full 50-ticker universe})}
 \begin{tabular}{lccp{5cm}}
 \toprule
 \textbf{Sector} & $\boldsymbol{H(2)}$ & $\boldsymbol{\Delta h}$ & \textbf{Character} \\
@@ -260,23 +266,27 @@ Intl ETF    & $\sim$0.43 & Low      & Closest to monofractal \\
 \end{tabular}
 \end{table}
 
+\begin{warningbox}
+\textbf{Status: Proposed, not computed.} The $\sim$ prefix on all values signals that these are informed extrapolations from the 7-asset portfolio MF-DFA (Table~\ref{tab:baseline}), not weighted averages computed over the full 50-ticker cross-section. Full sector-level MF-DFA requires running the dashboard's Multifractal runner over all tickers.
+\end{warningbox}
+
 \subsection{Cross-Sector MF-DCCA Correlations}
 
-The sector-pairwise $\rho_{\text{DCCA}}$ matrix measures cross-scale correlation---how synchronised two sectors' fractal structures are across all timescales.
+The sector-pairwise $\rho_{\text{DCCA}}$ matrix measures cross-scale correlation---how synchronised two sectors' fractal structures are across all timescales. \textbf{This matrix has not yet been computed; the values below are analytical predictions only.}
 
-\textbf{Expected findings:}
+\textbf{Proposed findings (not yet computed):}
 \begin{itemize}[nosep]
 \item \textbf{High $\rho_{\text{DCCA}}$ ($>0.6$):} Tech--Financials, Energy--Industrials
 \item \textbf{Low $\rho_{\text{DCCA}}$ ($<0.3$):} Gold--Equities, Crypto--Traditional
 \end{itemize}
 
 \begin{tipbox}
-Sectors with high MF-DCCA correlation are likely to experience \textbf{correlated regime changes} during stress events. A crisis in Financials will propagate to Tech across all timescales---this is the fractal signature of systemic contagion.
+Sectors with high MF-DCCA correlation are likely to experience \textbf{correlated regime changes} during stress events. A crisis in Financials will propagate to Tech across all timescales---this is the fractal signature of systemic contagion. \textit{This hypothesis should be tested once the full cross-sector MF-DCCA computation is run.}
 \end{tipbox}
 
 \subsection{Hierarchical Clustering (Dendrogram)}
 
-The dendrogram based on MF-DCCA distances ($d = 1 - \rho_{\text{DCCA}}$) reveals a ``multifractal similarity tree.'' Expected structure:
+The dendrogram based on MF-DCCA distances ($d = 1 - \rho_{\text{DCCA}}$) reveals a ``multifractal similarity tree.'' \textbf{Proposed structure (not yet computed from data):}
 
 \begin{verbatim}
   ├── Domestic equities cluster
@@ -289,14 +299,14 @@ The dendrogram based on MF-DCCA distances ($d = 1 - \rho_{\text{DCCA}}$) reveals
 \end{verbatim}
 
 \begin{notebox}
-This clustering is fundamentally different from correlation-based clustering. Two assets can have low Pearson correlation but high MF-DCCA if they share the same \emph{type} of multifractal dynamics. The dendrogram reveals the true ``fractal DNA'' relationships.
+This clustering is fundamentally different from correlation-based clustering. Two assets can have low Pearson correlation but high MF-DCCA if they share the same \emph{type} of multifractal dynamics. The dendrogram reveals the true ``fractal DNA'' relationships. \textit{The dendrogram and the MF-DCCA matrix that drives it have not yet been generated; this structure is a theoretical prediction.}
 \end{notebox}
 
 \subsection{Sector Tail Indices (Hill Estimator)}
 
-The Hill tail index $\alpha$ measures how heavy the loss distribution's tail is per sector. Lower $\alpha$ = fatter tail = more extreme-event risk.
+The Hill tail index $\alpha$ measures how heavy the loss distribution's tail is per sector. Lower $\alpha$ = fatter tail = more extreme-event risk. \textbf{The per-sector Hill estimates below have not been computed; this is a proposed ranking based on known return characteristics.}
 
-\textbf{Expected ranking} (fattest to thinnest tails):
+\textbf{Proposed ranking} (fattest to thinnest tails; not yet computed):
 \begin{enumerate}[nosep]
 \item Crypto (lowest $\alpha$)---most extreme tail risk
 \item Energy---commodity-linked fat tails
@@ -358,11 +368,11 @@ Using finite-difference approximation:
 
 where $\sigma^{\text{MF-DFA}}$ is the portfolio's spectral width.
 
-\textbf{Expected findings:}
+\textbf{Proposed findings (not yet computed):}
 \begin{itemize}[nosep]
-\item Assets with high $\Delta h$ \textbf{and} high retention ranking (JPM, XOM) have the largest marginal risk contribution.
+\item Assets with high $\Delta h$ \textbf{and} high retention ranking (JPM, XOM) are expected to have the largest marginal risk contribution.
 \item Gold (GC=F) likely has a near-zero or negative marginal contribution---increasing its weight \emph{reduces} portfolio multifractal complexity.
-\item This provides \textbf{actionable weight adjustments} for portfolio construction.
+\item This provides \textbf{actionable weight adjustments} for portfolio construction, contingent on computing the finite-difference MF risk budget from data.
 \end{itemize}
 
 \subsection{Multifractal-Adjusted Expected Shortfall}

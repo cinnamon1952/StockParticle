@@ -1,0 +1,8 @@
+numpy==1.26.4
+scipy==1.13.1
+pandas==2.2.3
+matplotlib==3.8.4
+statsmodels==0.14.1
+joblib==1.5.3
+yfinance==0.2.66
+ipykernel==6.31.0
